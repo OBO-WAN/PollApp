@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800&family=Nerko+One&family=Nokora:wght@400;700&display=swap');
+
+:root {
+  --color-primary-purple: #35273a;
+  --color-primary-orange: #ffb770;
+  --color-secondary-orange: #ffcfa1;
+  --color-card-background: #faf5fe;
+
+  --font-heading: 'Nerko One', cursive;
+  --font-body: 'Mulish', sans-serif;
+  --font-accent: 'Nokora', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  color: var(--color-card-background);
+  background-color: var(--color-primary-purple);
+  font-family: var(--font-body);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
