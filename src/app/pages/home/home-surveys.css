@@ -1,0 +1,210 @@
+
+
+/* Survey filters and complete survey list */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.survey-browser {
+  width: min(1042px, 100%);
+  margin: 40px auto 0;
+}
+
+.survey-filters {
+  display: flex;
+  min-height: 32px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.status-filters {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.filter-pill {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border: 0;
+  border-radius: 20px;
+  color: var(--color-primary-purple);
+  background-color: #fee9d4;
+  font-family: var(--font-accent);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-pill--active {
+  background-color: var(--color-primary-orange);
+}
+
+.filter-pill:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+.category-filter {
+  position: relative;
+  display: block;
+  width: 206px;
+  height: 32px;
+}
+
+.category-filter select {
+  width: 100%;
+  height: 32px;
+  padding: 4px 36px 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  appearance: none;
+  color: white;
+  background-color: transparent;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: normal;
+  cursor: pointer;
+}
+
+.category-filter select:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+.category-filter select option {
+  color: var(--color-primary-purple);
+  background-color: var(--color-card-background);
+  font-size: 16px;
+}
+
+.category-filter__icon {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.survey-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 33px;
+}
+
+.survey-list-card {
+  display: flex;
+  height: 127px;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 12px 20px;
+  overflow: hidden;
+  border-radius: 5px 50px 5px 5px;
+  color: white;
+  background-color: rgb(217 217 217 / 8%);
+}
+
+.survey-list-card__text {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.survey-list-card__category {
+  margin: 0;
+  color: var(--color-secondary-orange);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.survey-list-card h3 {
+  width: 100%;
+  margin: 0;
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.survey-list-card__deadline {
+  width: fit-content;
+  margin: 0;
+  padding: 3px 6px;
+  border-radius: 0 14px 0 0;
+  color: #221227;
+  background-color: var(--color-secondary-orange);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.survey-list__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 40px 20px;
+  border-radius: 5px 50px 5px 5px;
+  color: white;
+  background-color: rgb(217 217 217 / 8%);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Responsive foundation; we will refine against the mobile Figma frame later. */
+@media (max-width: 1099px) {
+  .survey-browser {
+    width: 100%;
+  }
+
+  .survey-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .survey-filters {
+    flex-direction: column;
+    gap: 24px;
+    padding-inline: 16px;
+  }
+
+  .status-filters {
+    gap: 16px;
+  }
+
+  .survey-list {
+    margin-top: 24px;
+    padding-inline: 16px;
+  }
+
+  .survey-list-card {
+    height: auto;
+    min-height: 127px;
+  }
+
+  .survey-list-card h3 {
+    font-size: 20px;
+  }
+}

@@ -83,5 +83,71 @@
         </div>
       </div>
     </section>
+    <section class="survey-browser" aria-label="Survey collection">
+      <div class="survey-filters">
+        <div class="status-filters" role="group" aria-label="Survey status">
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="selectedStatus() === 'active'"
+            [attr.aria-pressed]="selectedStatus() === 'active'"
+            type="button"
+            (click)="selectStatus('active')"
+          >
+            Active survey
+          </button>
+
+          <button
+            class="filter-pill"
+            [class.filter-pill--active]="selectedStatus() === 'past'"
+            [attr.aria-pressed]="selectedStatus() === 'past'"
+            type="button"
+            (click)="selectStatus('past')"
+          >
+            Past survey
+          </button>
+        </div>
+
+        <label class="category-filter">
+          <span class="visually-hidden">Filter surveys by category</span>
+
+          <select [value]="selectedCategory()" (change)="selectCategory($event)">
+            <option value="All">Sort by categories</option>
+
+            @for (category of categories; track category) {
+              @if (category !== 'All') {
+                <option [value]="category">{{ category }}</option>
+              }
+            }
+          </select>
+
+          <img
+            class="category-filter__icon"
+            src="assets/images/dropdown-arrow.svg"
+            alt=""
+            aria-hidden="true"
+          />
+        </label>
+      </div>
+
+      <div class="survey-list" aria-live="polite">
+        @for (survey of visibleSurveys(); track survey.id) {
+          <article class="survey-list-card">
+            <div class="survey-list-card__text">
+              <p class="survey-list-card__category">
+                {{ survey.category }}
+              </p>
+
+              <h3>{{ survey.title }}</h3>
+            </div>
+
+            <p class="survey-list-card__deadline">
+              {{ deadlineLabel(survey) }}
+            </p>
+          </article>
+        } @empty {
+          <p class="survey-list__empty">No surveys match this filter yet.</p>
+        }
+      </div>
+    </section>
   </main>
 </div>
