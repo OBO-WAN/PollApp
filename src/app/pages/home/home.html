@@ -58,5 +58,30 @@
         />
       </div>
     </section>
+    <section class="survey-highlights" aria-labelledby="surveys-title">
+      <h2 id="surveys-title">Your surveys</h2>
+
+      <div class="ending-soon">
+        <h3>Ending soon surveys</h3>
+
+        <div class="ending-soon__cards">
+          @for (survey of endingSoonSurveys; track survey.id) {
+            <article class="highlight-card">
+              <div class="highlight-card__content">
+                <div class="highlight-card__text">
+                  <p class="highlight-card__category">{{ survey.category }}</p>
+                  <h4>{{ survey.title }}</h4>
+                </div>
+
+                <p class="highlight-card__deadline">
+                  Ends in {{ survey.daysRemaining }}
+                  {{ survey.daysRemaining === 1 ? 'Day' : 'Days' }}
+                </p>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
   </main>
 </div>
