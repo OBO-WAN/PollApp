@@ -15,7 +15,7 @@ interface SurveySummary {
   selector: 'app-home',
   imports: [],
   templateUrl: './home.html',
-  styleUrls: ['./home.css', './home-surveys.css', './home-motion.css'],
+  styleUrls: ['./home.css', './home-surveys.css'],
 })
 export class Home {
   private readonly surveys: readonly SurveySummary[] = [
