@@ -1,0 +1,23 @@
+.hero__image--hover {
+  opacity: 0;
+}
+
+@media (min-width: 1100px) and (hover: hover) and (pointer: fine) {
+  .hero__image {
+    transition: opacity 280ms ease-in-out;
+  }
+
+  .hero__visual:hover .hero__image--rest {
+    opacity: 0;
+  }
+
+  .hero__visual:hover .hero__image--hover {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__image {
+    transition: none;
+  }
+}
