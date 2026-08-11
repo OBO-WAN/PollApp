@@ -15,7 +15,12 @@ interface SurveySummary {
   selector: 'app-home',
   imports: [],
   templateUrl: './home.html',
-  styleUrls: ['./home.css', './home-surveys.css', './home-motion.css'],
+  styleUrls: [
+    './home.css',
+    './home-surveys.css',
+    './home-motion.css',
+    './home-button.css',
+  ],
 })
 
 export class Home {

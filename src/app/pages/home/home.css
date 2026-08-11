@@ -133,21 +133,6 @@
   line-height: normal;
 }
 
-.primary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 10px;
-  color: #221227;
-  background-color: var(--color-secondary-orange);
-  font-family: var(--font-accent);
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .hero__visual {
   position: relative;
   width: 426px;
