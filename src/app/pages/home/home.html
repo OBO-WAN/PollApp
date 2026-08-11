@@ -39,7 +39,7 @@
           </p>
         </div>
 
-        <button class="primary-button" type="button">New survey</button>
+        <a class="primary-button" routerLink="/surveys/new">New survey</a>
       </div>
 
       <div class="hero__visual" aria-hidden="true">
@@ -62,7 +62,7 @@
         <h3>Ending soon surveys</h3>
 
         <div class="ending-soon__cards">
-          @for (survey of endingSoonSurveys; track survey.id) {
+          @for (survey of endingSoonSurveys(); track survey.id) {
             <article class="highlight-card">
               <div class="highlight-card__content">
                 <div class="highlight-card__text">
@@ -110,7 +110,7 @@
           <select [value]="selectedCategory()" (change)="selectCategory($event)">
             <option value="All">Sort by categories</option>
 
-            @for (category of categories; track category) {
+            @for (category of categories(); track category) {
               @if (category !== 'All') {
                 <option [value]="category">{{ category }}</option>
               }
