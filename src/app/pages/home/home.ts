@@ -17,9 +17,9 @@ interface SurveySummary {
   templateUrl: './home.html',
   styleUrls: [
     './home.css',
-    './home-surveys.css',
-    './home-motion.css',
-    './home-button.css',
+    './styles/surveys.css',
+    './styles/motion.css',
+    './styles/button.css',
   ],
 })
 
