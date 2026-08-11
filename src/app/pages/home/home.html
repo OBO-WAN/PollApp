@@ -39,7 +39,23 @@
           </p>
         </div>
 
-        <a class="primary-button" routerLink="/surveys/new">New survey</a>
+        <button
+          class="primary-button"
+          type="button"
+          aria-label="New survey"
+          (click)="startSurveyCreation()"
+        >
+          <img
+            class="primary-button__state primary-button__state--default"
+            src="assets/images/new-survey-default.svg"
+            alt=""
+          />
+          <img
+            class="primary-button__state primary-button__state--hover"
+            src="assets/images/new-survey-hover.svg"
+            alt=""
+          />
+        </button>
       </div>
 
       <div class="hero__visual" aria-hidden="true">
