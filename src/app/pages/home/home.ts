@@ -1,19 +1,12 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-type SurveyStatus = 'active' | 'past';
-
-interface SurveySummary {
-  readonly id: number;
-  readonly category: string;
-  readonly title: string;
-  readonly daysRemaining: number;
-  readonly status: SurveyStatus;
-  readonly featured: boolean;
-}
+import { Survey, SurveyStatus } from '../../surveys/survey.model';
+import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './home.html',
   styleUrls: [
     './home.css',
@@ -24,89 +17,25 @@ interface SurveySummary {
 })
 
 export class Home {
-  private readonly surveys: readonly SurveySummary[] = [
-    {
-      id: 1,
-      category: 'Team activities',
-      title: 'Let’s Plan the Next Team Event Together',
-      daysRemaining: 1,
-      status: 'active',
-      featured: true,
-    },
-    {
-      id: 2,
-      category: 'Gaming',
-      title: 'Gaming habits and favorite games!',
-      daysRemaining: 3,
-      status: 'active',
-      featured: true,
-    },
-    {
-      id: 3,
-      category: 'Gaming',
-      title: 'Gaming habits and favorite games!',
-      daysRemaining: 3,
-      status: 'active',
-      featured: false,
-    },
-    {
-      id: 4,
-      category: 'Healthy Lifestyle',
-      title: 'Healthier future: Fit & wellness survey!',
-      daysRemaining: 2,
-      status: 'active',
-      featured: true,
-    },
-    {
-      id: 5,
-      category: 'Healthy Lifestyle',
-      title: 'Healthier future: Fit & wellness survey!',
-      daysRemaining: 2,
-      status: 'active',
-      featured: false,
-    },
-    {
-      id: 6,
-      category: 'Team activities',
-      title: 'Let’s Plan the Next Team Event Together',
-      daysRemaining: 1,
-      status: 'active',
-      featured: false,
-    },
-    {
-      id: 7,
-      category: 'Workplace culture',
-      title: 'How do you feel about remote work?',
-      daysRemaining: -4,
-      status: 'past',
-      featured: false,
-    },
-    {
-      id: 8,
-      category: 'Team activities',
-      title: 'Summer team event retrospective',
-      daysRemaining: -7,
-      status: 'past',
-      featured: false,
-    },
-    {
-      id: 9,
-      category: 'Healthy Lifestyle',
-      title: 'Weekly wellness check-in',
-      daysRemaining: -12,
-      status: 'past',
-      featured: false,
-    },
-  ];
+  private readonly surveyStore = inject(SurveyStore);
+  private readonly surveys = this.surveyStore.surveys;
 
-  protected readonly endingSoonSurveys = [...this.surveys]
-    .filter((survey) => survey.status === 'active' && survey.featured)
-    .sort((first, second) => first.daysRemaining - second.daysRemaining);
+  protected readonly endingSoonSurveys = computed(() =>
+    [...this.surveys()]
+      .filter(
+        (survey) => survey.status === 'active' && survey.featured && survey.daysRemaining !== null,
+      )
+      .sort(
+        (first, second) =>
+          (first.daysRemaining ?? Number.POSITIVE_INFINITY) -
+          (second.daysRemaining ?? Number.POSITIVE_INFINITY),
+      ),
+  );
 
-  protected readonly categories: readonly string[] = [
+  protected readonly categories = computed<readonly string[]>(() => [
     'All',
-    ...new Set(this.surveys.map((survey) => survey.category)),
-  ];
+    ...new Set(this.surveys().map((survey) => survey.category)),
+  ]);
 
   protected readonly selectedStatus = signal<SurveyStatus>('active');
   protected readonly selectedCategory = signal('All');
@@ -115,7 +44,7 @@ export class Home {
     const status = this.selectedStatus();
     const category = this.selectedCategory();
 
-    return this.surveys.filter((survey) => {
+    return this.surveys().filter((survey) => {
       const matchesStatus = survey.status === status;
       const matchesCategory = category === 'All' || survey.category === category;
 
@@ -133,7 +62,11 @@ export class Home {
     this.selectedCategory.set(selectElement.value);
   }
 
-  protected deadlineLabel(survey: SurveySummary): string {
+  protected deadlineLabel(survey: Survey): string {
+    if (survey.daysRemaining === null) {
+      return 'No deadline';
+    }
+
     const days = Math.abs(survey.daysRemaining);
     const unit = days === 1 ? 'Day' : 'Days';
 

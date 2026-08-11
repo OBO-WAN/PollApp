@@ -1,0 +1,252 @@
+<div class="create-survey-page">
+  <main class="survey-editor" aria-labelledby="create-survey-title">
+    <header class="editor-header">
+      <div>
+        <span class="draft-badge">Draft</span>
+        <h1 id="create-survey-title">Create new survey</h1>
+      </div>
+
+      <a class="cancel-button" routerLink="/">Cancel</a>
+    </header>
+
+    <form [formGroup]="surveyForm" (ngSubmit)="publish()" novalidate>
+      <div class="form-panel">
+        <section class="survey-details" aria-labelledby="survey-details-title">
+          <h2 id="survey-details-title" class="visually-hidden">Survey details</h2>
+
+          <div class="survey-details__left">
+            <div class="field-group">
+              <label for="survey-title">
+                Survey name <span class="required-label">(required)</span>
+              </label>
+
+              <div class="field-with-action">
+                <input
+                  id="survey-title"
+                  type="text"
+                  formControlName="title"
+                  autocomplete="off"
+                  [attr.aria-invalid]="showError(surveyForm.controls.title)"
+                  aria-describedby="survey-title-error"
+                />
+
+                <button
+                  class="icon-button"
+                  type="button"
+                  aria-label="Clear survey name"
+                  (click)="clearField('title')"
+                >
+                  <img src="assets/images/create-survey/delete.svg" alt="" />
+                </button>
+              </div>
+
+              @if (showError(surveyForm.controls.title)) {
+                <p id="survey-title-error" class="field-error">Enter a survey name.</p>
+              }
+            </div>
+
+            <div class="compact-fields">
+              <div class="field-group">
+                <label for="survey-end-date">Set end date <span>(optional)</span></label>
+
+                <div class="field-with-action">
+                  <input
+                    id="survey-end-date"
+                    type="date"
+                    formControlName="endDate"
+                    [min]="minimumEndDate"
+                    [attr.aria-invalid]="showError(surveyForm.controls.endDate)"
+                    [attr.aria-describedby]="
+                      showError(surveyForm.controls.endDate) ? 'survey-end-date-error' : null
+                    "
+                  />
+
+                  <button
+                    class="icon-button"
+                    type="button"
+                    aria-label="Clear end date"
+                    (click)="clearField('endDate')"
+                  >
+                    <img src="assets/images/create-survey/delete.svg" alt="" />
+                  </button>
+                </div>
+
+                @if (showError(surveyForm.controls.endDate)) {
+                  <p id="survey-end-date-error" class="field-error">
+                    Choose today or a later date.
+                  </p>
+                }
+              </div>
+
+              <div class="field-group category-field">
+                <label for="survey-category">
+                  Choose category <span class="required-label">(required)</span>
+                </label>
+
+                <div class="select-field">
+                  <select
+                    id="survey-category"
+                    formControlName="category"
+                    [attr.aria-invalid]="showError(surveyForm.controls.category)"
+                    aria-describedby="survey-category-error"
+                  >
+                    <option value="" disabled>Select category</option>
+
+                    @for (category of categories; track category) {
+                      <option [value]="category">{{ category }}</option>
+                    }
+                  </select>
+
+                  <img src="assets/images/dropdown-arrow.svg" alt="" aria-hidden="true" />
+                </div>
+
+                @if (showError(surveyForm.controls.category)) {
+                  <p id="survey-category-error" class="field-error">Choose a category.</p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group description-field">
+            <label for="survey-description">Describing text <span>(optional)</span></label>
+
+            <div class="field-with-action field-with-action--top">
+              <textarea id="survey-description" formControlName="description"></textarea>
+
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Clear description"
+                (click)="clearField('description')"
+              >
+                <img src="assets/images/create-survey/delete.svg" alt="" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="question-builder" aria-labelledby="questions-title">
+          <h2 id="questions-title" class="visually-hidden">Survey questions</h2>
+
+          <div class="questions" formArrayName="questions">
+            @for (question of questions.controls; track question; let questionIndex = $index) {
+              <fieldset class="question-card" [formGroupName]="questionIndex">
+                <legend>{{ questionIndex + 1 }}. Question</legend>
+
+                <button
+                  class="icon-button question-delete"
+                  type="button"
+                  [disabled]="questions.length === 1"
+                  [attr.aria-label]="'Delete question ' + (questionIndex + 1)"
+                  (click)="removeQuestion(questionIndex)"
+                >
+                  <img src="assets/images/create-survey/delete.svg" alt="" />
+                </button>
+
+                <label class="visually-hidden" [for]="'question-' + questionIndex">
+                  Question {{ questionIndex + 1 }} text
+                </label>
+                <input
+                  [id]="'question-' + questionIndex"
+                  type="text"
+                  formControlName="prompt"
+                  placeholder="Which date would work best for you?"
+                  [attr.aria-invalid]="showError(question.controls.prompt)"
+                  [attr.aria-describedby]="'question-error-' + questionIndex"
+                />
+
+                @if (showError(question.controls.prompt)) {
+                  <p [id]="'question-error-' + questionIndex" class="field-error">
+                    Enter a question.
+                  </p>
+                }
+
+                <div class="answer-heading">
+                  <h3>Answers <span class="required-label">(required)</span></h3>
+
+                  <label class="multiple-answer-option">
+                    <input type="checkbox" formControlName="allowMultiple" />
+                    <span>Allow multiple answers.</span>
+                  </label>
+                </div>
+
+                <div class="answer-list" formArrayName="answers">
+                  @for (
+                    answer of answersFor(questionIndex).controls;
+                    track answer;
+                    let answerIndex = $index
+                  ) {
+                    <div class="answer-row">
+                      <label [for]="'answer-' + questionIndex + '-' + answerIndex">
+                        {{ answerLabel(answerIndex) }}.
+                      </label>
+                      <input
+                        [id]="'answer-' + questionIndex + '-' + answerIndex"
+                        type="text"
+                        [formControlName]="answerIndex"
+                        [attr.aria-invalid]="showError(answer)"
+                        [attr.aria-describedby]="
+                          'answer-error-' + questionIndex + '-' + answerIndex
+                        "
+                      />
+                      <button
+                        class="icon-button"
+                        type="button"
+                        [disabled]="answersFor(questionIndex).length === 2"
+                        [attr.aria-label]="'Delete answer ' + answerLabel(answerIndex)"
+                        (click)="removeAnswer(questionIndex, answerIndex)"
+                      >
+                        <img src="assets/images/create-survey/delete.svg" alt="" />
+                      </button>
+
+                      @if (showError(answer)) {
+                        <p
+                          [id]="'answer-error-' + questionIndex + '-' + answerIndex"
+                          class="field-error answer-error"
+                        >
+                          Enter an answer.
+                        </p>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <button class="text-action" type="button" (click)="addAnswer(questionIndex)">
+                  <span class="text-action__label">
+                    <span>Add answer</span>
+                    <img
+                      class="text-action__underline"
+                      src="assets/images/create-survey/underline.svg"
+                      alt=""
+                    />
+                  </span>
+                  <img src="assets/images/create-survey/add-circle.svg" alt="" />
+                </button>
+              </fieldset>
+            }
+          </div>
+
+          <button class="secondary-action" type="button" (click)="addQuestion()">
+            <span>Add next question</span>
+            <img src="assets/images/create-survey/add-circle.svg" alt="" />
+          </button>
+        </section>
+      </div>
+
+      <div class="editor-actions">
+        <button class="publish-button" type="submit" [disabled]="isPublishing() || published()">
+          {{ isPublishing() ? 'Publishing…' : 'Publish' }}
+        </button>
+      </div>
+    </form>
+
+    @if (published()) {
+      <aside class="published-notice" role="status" aria-live="polite">
+        <p>Your survey is now published</p>
+        <button type="button" aria-label="Return to survey list" (click)="returnToSurveyList()">
+          <img src="assets/images/create-survey/close.svg" alt="" />
+        </button>
+      </aside>
+    }
+  </main>
+</div>
