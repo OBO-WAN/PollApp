@@ -1,72 +1,67 @@
 .primary-button {
   position: relative;
-  display: inline-flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
+  width: 138px;
+  height: 48px;
   overflow: hidden;
-  padding: 12px 16px;
+  flex: 0 0 auto;
+  padding: 0;
   border: 0;
   border-radius: 10px;
-  color: #221227;
-  background-color: var(--color-secondary-orange);
-  font-family: var(--font-accent);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 24px;
-  text-decoration: none;
-  white-space: nowrap;
+  background: transparent;
   cursor: pointer;
-  transition:
-    padding-inline-end 280ms ease-in-out,
-    background-color 280ms ease-in-out;
+  transition: width 280ms ease-in-out;
 }
 
-.primary-button::after {
+.primary-button__state {
   position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 24px;
-  height: 24px;
-  background:
-    linear-gradient(currentColor, currentColor) center / 10px 2px no-repeat,
-    linear-gradient(currentColor, currentColor) center / 2px 10px no-repeat,
-    radial-gradient(circle, transparent 8px, currentColor 8px 10px, transparent 10px);
-  content: '';
+  top: 0;
+  left: 0;
+  width: auto;
+  max-width: none;
+  height: 48px;
+  pointer-events: none;
+  transition: opacity 180ms ease-in-out;
+}
+
+.primary-button__state--default {
+  opacity: 1;
+}
+
+.primary-button__state--hover {
   opacity: 0;
-  transform: translate(-8px, -50%);
-  transition:
-    opacity 220ms ease-in-out,
-    transform 280ms ease-in-out;
 }
 
 .primary-button:focus-visible {
-  padding-inline-end: 50px;
+  width: 172px;
   outline: 3px solid white;
   outline-offset: 3px;
-  background-color: var(--color-primary-orange);
 }
 
-.primary-button:focus-visible::after {
+.primary-button:focus-visible .primary-button__state--default {
+  opacity: 0;
+}
+
+.primary-button:focus-visible .primary-button__state--hover {
   opacity: 1;
-  transform: translate(0, -50%);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .primary-button:hover {
-    padding-inline-end: 50px;
-    background-color: var(--color-primary-orange);
+    width: 172px;
   }
 
-  .primary-button:hover::after {
+  .primary-button:hover .primary-button__state--default {
+    opacity: 0;
+  }
+
+  .primary-button:hover .primary-button__state--hover {
     opacity: 1;
-    transform: translate(0, -50%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .primary-button,
-  .primary-button::after {
+  .primary-button__state {
     transition: none;
   }
 }

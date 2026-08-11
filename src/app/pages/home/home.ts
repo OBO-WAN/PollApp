@@ -1,12 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { Survey, SurveyStatus } from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './home.html',
   styleUrls: [
     './home.css',
@@ -17,6 +17,7 @@ import { SurveyStore } from '../../surveys/survey-store';
 })
 
 export class Home {
+  private readonly router = inject(Router);
   private readonly surveyStore = inject(SurveyStore);
   private readonly surveys = this.surveyStore.surveys;
 
@@ -60,6 +61,10 @@ export class Home {
   protected selectCategory(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedCategory.set(selectElement.value);
+  }
+
+  protected startSurveyCreation(): void {
+    void this.router.navigateByUrl('/surveys/new');
   }
 
   protected deadlineLabel(survey: Survey): string {
