@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  await page.route(
+    /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
+    (route) => route.abort(),
+  );
+});
+
 test('opens the new survey page from Home', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'New survey' }).click();
