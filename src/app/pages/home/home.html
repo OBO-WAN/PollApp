@@ -59,11 +59,7 @@
       </div>
 
       <div class="hero__visual" aria-hidden="true">
-        <img
-          class="hero__image hero__image--rest"
-          src="assets/images/home-hero-rest.svg"
-          alt=""
-        />
+        <img class="hero__image hero__image--rest" src="assets/images/home-hero-rest.svg" alt="" />
         <img
           class="hero__image hero__image--hover"
           src="assets/images/home-hero-hover.svg"
@@ -79,7 +75,11 @@
 
         <div class="ending-soon__cards">
           @for (survey of endingSoonSurveys(); track survey.id) {
-            <article class="highlight-card">
+            <a
+              class="highlight-card"
+              [routerLink]="['/surveys', survey.id]"
+              [attr.aria-label]="'View survey: ' + survey.title"
+            >
               <div class="highlight-card__content">
                 <div class="highlight-card__text">
                   <p class="highlight-card__category">{{ survey.category }}</p>
@@ -91,7 +91,7 @@
                   {{ survey.daysRemaining === 1 ? 'Day' : 'Days' }}
                 </p>
               </div>
-            </article>
+            </a>
           }
         </div>
       </div>
@@ -144,7 +144,11 @@
 
       <div class="survey-list" aria-live="polite">
         @for (survey of visibleSurveys(); track survey.id) {
-          <article class="survey-list-card">
+          <a
+            class="survey-list-card"
+            [routerLink]="['/surveys', survey.id]"
+            [attr.aria-label]="'View survey: ' + survey.title"
+          >
             <div class="survey-list-card__text">
               <p class="survey-list-card__category">
                 {{ survey.category }}
@@ -156,7 +160,7 @@
             <p class="survey-list-card__deadline">
               {{ deadlineLabel(survey) }}
             </p>
-          </article>
+          </a>
         } @empty {
           <p class="survey-list__empty">No surveys match this filter yet.</p>
         }

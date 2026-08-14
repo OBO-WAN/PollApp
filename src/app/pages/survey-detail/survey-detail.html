@@ -1,0 +1,95 @@
+<div class="survey-detail-page">
+  <header class="detail-navigation">
+    <a class="back-link" routerLink="/">
+      <span aria-hidden="true">←</span>
+      Back to surveys
+    </a>
+
+    <span class="preview-label">Survey preview</span>
+  </header>
+
+  <main class="detail-panel">
+    @if (survey(); as currentSurvey) {
+      <header class="survey-summary">
+        <div class="survey-summary__copy">
+          <div class="survey-summary__labels">
+            <span class="category-label">{{ currentSurvey.category }}</span>
+            <span class="status-label">{{ currentSurvey.status }} survey</span>
+          </div>
+
+          <h1>{{ currentSurvey.title }}</h1>
+
+          @if (currentSurvey.description) {
+            <p class="survey-description">{{ currentSurvey.description }}</p>
+          }
+        </div>
+
+        <dl class="survey-meta">
+          <div>
+            <dt>Deadline</dt>
+            <dd>{{ deadlineLabel(currentSurvey) }}</dd>
+          </div>
+          <div>
+            <dt>Questions</dt>
+            <dd>{{ questionCountLabel(currentSurvey.questions.length) }}</dd>
+          </div>
+        </dl>
+      </header>
+
+      <section class="survey-questions" aria-labelledby="survey-questions-title">
+        <div class="section-heading">
+          <div>
+            <p>Take a look</p>
+            <h2 id="survey-questions-title">Survey questions</h2>
+          </div>
+
+          <p class="read-only-note">Answers are read-only in this preview.</p>
+        </div>
+
+        <div class="question-list">
+          @for (
+            question of currentSurvey.questions;
+            track question.id;
+            let questionIndex = $index
+          ) {
+            <article class="question-card">
+              <header class="question-card__header">
+                <p>Question {{ questionIndex + 1 }}</p>
+                <span>{{ question.allowMultiple ? 'Multiple choice' : 'Single choice' }}</span>
+              </header>
+
+              <h3>{{ question.prompt }}</h3>
+
+              <ul class="answer-list" aria-label="Answer choices">
+                @for (answer of question.answers; track answer.id; let answerIndex = $index) {
+                  <li class="answer-option">
+                    <span
+                      class="answer-option__marker"
+                      [class.answer-option__marker--multiple]="question.allowMultiple"
+                      aria-hidden="true"
+                    >
+                      {{ answerLabel(answerIndex) }}
+                    </span>
+                    <span>{{ answer.text }}</span>
+                  </li>
+                }
+              </ul>
+            </article>
+          } @empty {
+            <div class="questions-empty">
+              <h3>No questions yet</h3>
+              <p>This survey does not have any questions to preview.</p>
+            </div>
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="not-found" aria-labelledby="not-found-title">
+        <p class="not-found__label">Survey not found</p>
+        <h1 id="not-found-title">This survey is no longer available.</h1>
+        <p>It may have been removed, or the link may be incorrect.</p>
+        <a routerLink="/">Return to your surveys</a>
+      </section>
+    }
+  </main>
+</div>

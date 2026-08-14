@@ -32,4 +32,13 @@ describe('SurveyStore', () => {
     expect(created.daysRemaining).toBeNull();
     expect(created.questions[0].answers).toHaveLength(2);
   });
+
+  it('finds a survey by its route id', () => {
+    const survey = store.getSurveyById('1');
+
+    expect(survey?.title).toBe('Let’s Plan the Next Team Event Together');
+    expect(survey?.questions).toHaveLength(3);
+    expect(store.getSurveyById('missing')).toBeUndefined();
+    expect(store.getSurveyById(null)).toBeUndefined();
+  });
 });
