@@ -1,18 +1,55 @@
 import { Injectable, signal } from '@angular/core';
 
-import { CreateSurveyInput, Survey } from './survey.model';
+import { CreateSurveyInput, Survey, SurveyQuestion } from './survey.model';
+
+const TEAM_EVENT_QUESTIONS: readonly SurveyQuestion[] = [
+  {
+    id: 'question-1',
+    prompt: 'Which activity should we plan?',
+    allowMultiple: false,
+    answers: [
+      { id: 'answer-1', text: 'Escape room' },
+      { id: 'answer-2', text: 'Cooking class' },
+      { id: 'answer-3', text: 'Outdoor picnic' },
+      { id: 'answer-4', text: 'Museum visit' },
+    ],
+  },
+  {
+    id: 'question-2',
+    prompt: 'Which days work for you?',
+    allowMultiple: true,
+    answers: [
+      { id: 'answer-5', text: 'Thursday' },
+      { id: 'answer-6', text: 'Friday' },
+      { id: 'answer-7', text: 'Saturday' },
+    ],
+  },
+  {
+    id: 'question-3',
+    prompt: 'What time of day do you prefer?',
+    allowMultiple: false,
+    answers: [
+      { id: 'answer-8', text: 'Morning' },
+      { id: 'answer-9', text: 'Afternoon' },
+      { id: 'answer-10', text: 'Evening' },
+    ],
+  },
+];
 
 const INITIAL_SURVEYS: readonly Survey[] = [
-  createInitialSurvey('1', 'Team activities', 'Let’s Plan the Next Team Event Together', 1, true),
-  createInitialSurvey('2', 'Gaming', 'Gaming habits and favorite games!', 3, true),
+  createInitialSurvey('1', 'Team activities', 'Let’s Plan the Next Team Event Together', 1, {
+    featured: true,
+    description:
+      'Help us choose an activity, day, and time that make the next team event work for everyone.',
+    questions: TEAM_EVENT_QUESTIONS,
+  }),
+  createInitialSurvey('2', 'Gaming', 'Gaming habits and favorite games!', 3, {
+    featured: true,
+  }),
   createInitialSurvey('3', 'Gaming', 'Gaming habits and favorite games!', 3),
-  createInitialSurvey(
-    '4',
-    'Healthy Lifestyle',
-    'Healthier future: Fit & wellness survey!',
-    2,
-    true,
-  ),
+  createInitialSurvey('4', 'Healthy Lifestyle', 'Healthier future: Fit & wellness survey!', 2, {
+    featured: true,
+  }),
   createInitialSurvey('5', 'Healthy Lifestyle', 'Healthier future: Fit & wellness survey!', 2),
   createInitialSurvey('6', 'Team activities', 'Let’s Plan the Next Team Event Together', 1),
   createInitialSurvey('7', 'Workplace culture', 'How do you feel about remote work?', -4),
@@ -27,6 +64,10 @@ export class SurveyStore {
   private readonly surveysState = signal<readonly Survey[]>(INITIAL_SURVEYS);
 
   readonly surveys = this.surveysState.asReadonly();
+
+  getSurveyById(id: string | null): Survey | undefined {
+    return id ? this.surveysState().find((survey) => survey.id === id) : undefined;
+  }
 
   async createSurvey(input: CreateSurveyInput): Promise<Survey> {
     const survey: Survey = {
@@ -60,18 +101,22 @@ function createInitialSurvey(
   category: string,
   title: string,
   daysRemaining: number,
-  featured = false,
+  options: {
+    readonly description?: string;
+    readonly featured?: boolean;
+    readonly questions?: readonly SurveyQuestion[];
+  } = {},
 ): Survey {
   return {
     id,
     category,
     title,
-    description: '',
+    description: options.description ?? '',
     endDate: null,
     daysRemaining,
     status: daysRemaining >= 0 ? 'active' : 'past',
-    featured,
-    questions: [],
+    featured: options.featured ?? false,
+    questions: options.questions ?? [],
   };
 }
 

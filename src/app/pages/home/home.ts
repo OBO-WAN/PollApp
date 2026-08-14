@@ -1,21 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { Survey, SurveyStatus } from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './home.html',
-  styleUrls: [
-    './home.css',
-    './styles/surveys.css',
-    './styles/motion.css',
-    './styles/button.css',
-  ],
+  styleUrls: ['./home.css', './styles/surveys.css', './styles/motion.css', './styles/button.css'],
 })
-
 export class Home {
   private readonly router = inject(Router);
   private readonly surveyStore = inject(SurveyStore);
@@ -75,8 +69,6 @@ export class Home {
     const days = Math.abs(survey.daysRemaining);
     const unit = days === 1 ? 'Day' : 'Days';
 
-    return survey.status === 'active'
-      ? `Ends in ${days} ${unit}`
-      : `Ended ${days} ${unit} ago`;
+    return survey.status === 'active' ? `Ends in ${days} ${unit}` : `Ended ${days} ${unit} ago`;
   }
 }

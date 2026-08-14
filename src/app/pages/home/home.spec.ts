@@ -38,4 +38,19 @@ describe('Home', () => {
     expect(navigate).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith('/surveys/new');
   });
+
+  it('links survey cards to their read-only detail pages', () => {
+    const featuredLink = fixture.nativeElement.querySelector(
+      '.highlight-card',
+    ) as HTMLAnchorElement;
+    const surveyLink = fixture.nativeElement.querySelector(
+      '.survey-list-card',
+    ) as HTMLAnchorElement;
+
+    expect(featuredLink.getAttribute('href')).toBe('/surveys/1');
+    expect(featuredLink.getAttribute('aria-label')).toContain(
+      'Let’s Plan the Next Team Event Together',
+    );
+    expect(surveyLink.getAttribute('href')).toBe('/surveys/1');
+  });
 });

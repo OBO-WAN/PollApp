@@ -1,6 +1,21 @@
-
-
 /* Survey filters and complete survey list */
+
+.highlight-card {
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgb(0 0 0 / 18%);
+}
+
+.highlight-card:focus-visible {
+  outline: 3px solid var(--color-primary-orange);
+  outline-offset: 5px;
+}
 
 .visually-hidden {
   position: absolute;
@@ -121,6 +136,20 @@
   border-radius: 5px 50px 5px 5px;
   color: white;
   background-color: rgb(217 217 217 / 8%);
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.survey-list-card:hover {
+  background-color: rgb(217 217 217 / 14%);
+  transform: translateY(-2px);
+}
+
+.survey-list-card:focus-visible {
+  outline: 3px solid var(--color-primary-orange);
+  outline-offset: 3px;
 }
 
 .survey-list-card__text {
@@ -170,6 +199,13 @@
   background-color: rgb(217 217 217 / 8%);
   font-size: 18px;
   text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlight-card,
+  .survey-list-card {
+    transition: none;
+  }
 }
 
 /* Responsive foundation; we will refine against the mobile Figma frame later. */

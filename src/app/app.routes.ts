@@ -12,4 +12,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/create-survey/create-survey').then(({ CreateSurvey }) => CreateSurvey),
   },
+  {
+    path: 'surveys/:surveyId',
+    loadComponent: () =>
+      import('./pages/survey-detail/survey-detail').then(({ SurveyDetail }) => SurveyDetail),
+  },
 ];
