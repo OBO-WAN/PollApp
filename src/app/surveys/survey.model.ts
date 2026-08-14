@@ -3,6 +3,7 @@ export type SurveyStatus = 'active' | 'past';
 export interface SurveyAnswer {
   readonly id: string;
   readonly text: string;
+  readonly voteCount: number;
 }
 
 export interface SurveyQuestion {

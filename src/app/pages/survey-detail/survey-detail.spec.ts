@@ -28,8 +28,14 @@ describe('SurveyDetail', () => {
     expect(page.querySelector('h1')?.textContent).toContain(
       'Let’s Plan the Next Team Event Together',
     );
-    expect(page.querySelectorAll('.question-card')).toHaveLength(3);
-    expect(page.querySelectorAll('.answer-option')).toHaveLength(10);
+    expect(page.querySelectorAll('.question-item')).toHaveLength(4);
+    expect(page.querySelectorAll('.answer-option')).toHaveLength(16);
+    expect(page.querySelectorAll('.answer-option input:disabled')).toHaveLength(16);
+    expect(page.querySelectorAll('.result-item')).toHaveLength(4);
+    expect(page.querySelector('.survey-results')?.textContent).toContain('86%');
+    expect((page.querySelector('.complete-survey-button') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
     expect(page.querySelector('form')).toBeNull();
   });
 

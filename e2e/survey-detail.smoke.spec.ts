@@ -16,7 +16,9 @@ test('opens a read-only survey detail page from Home', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Let’s Plan the Next Team Event Together' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Survey questions' })).toBeVisible();
-  await expect(page.getByText('Which activity should we plan?')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Survey results LIVE' })).toBeVisible();
+  await expect(page.getByText('Which date would work best for you?').first()).toBeVisible();
+  await expect(page.getByRole('checkbox').first()).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Complete survey' })).toBeDisabled();
   await expect(page.locator('main form')).toHaveCount(0);
 });
