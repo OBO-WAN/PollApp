@@ -5,33 +5,46 @@ import { CreateSurveyInput, Survey, SurveyQuestion } from './survey.model';
 const TEAM_EVENT_QUESTIONS: readonly SurveyQuestion[] = [
   {
     id: 'question-1',
-    prompt: 'Which activity should we plan?',
-    allowMultiple: false,
+    prompt: 'Which date would work best for you?',
+    allowMultiple: true,
     answers: [
-      { id: 'answer-1', text: 'Escape room' },
-      { id: 'answer-2', text: 'Cooking class' },
-      { id: 'answer-3', text: 'Outdoor picnic' },
-      { id: 'answer-4', text: 'Museum visit' },
+      { id: 'answer-1', text: '19.09.2025, Friday', voteCount: 27 },
+      { id: 'answer-2', text: '10.10.2025, Friday', voteCount: 44 },
+      { id: 'answer-3', text: '11.10.2025, Saturday', voteCount: 3 },
+      { id: 'answer-4', text: '31.10.2025, Friday', voteCount: 26 },
     ],
   },
   {
     id: 'question-2',
-    prompt: 'Which days work for you?',
+    prompt: 'Choose the activities you prefer',
     allowMultiple: true,
     answers: [
-      { id: 'answer-5', text: 'Thursday' },
-      { id: 'answer-6', text: 'Friday' },
-      { id: 'answer-7', text: 'Saturday' },
+      { id: 'answer-5', text: 'Outdoor adventure like kayaking', voteCount: 60 },
+      { id: 'answer-6', text: 'Office Costume Party', voteCount: 0 },
+      { id: 'answer-7', text: 'Bowling, mini-golf, volleyball', voteCount: 14 },
+      { id: 'answer-8', text: 'Beach party, Music & cocktails', voteCount: 26 },
+      { id: 'answer-9', text: 'Escape room', voteCount: 0 },
     ],
   },
   {
     id: 'question-3',
-    prompt: 'What time of day do you prefer?',
+    prompt: 'What’s most important to you in a team event?',
     allowMultiple: false,
     answers: [
-      { id: 'answer-8', text: 'Morning' },
-      { id: 'answer-9', text: 'Afternoon' },
-      { id: 'answer-10', text: 'Evening' },
+      { id: 'answer-10', text: 'Team bonding', voteCount: 44 },
+      { id: 'answer-11', text: 'Food and drinks', voteCount: 3 },
+      { id: 'answer-12', text: 'Trying something new', voteCount: 26 },
+      { id: 'answer-13', text: 'Keeping it low-key and stress-free', voteCount: 27 },
+    ],
+  },
+  {
+    id: 'question-4',
+    prompt: 'How long would you prefer the event to last?',
+    allowMultiple: false,
+    answers: [
+      { id: 'answer-14', text: 'Half a day', voteCount: 14 },
+      { id: 'answer-15', text: 'Full day', voteCount: 86 },
+      { id: 'answer-16', text: 'Evening only', voteCount: 0 },
     ],
   },
 ];
@@ -40,7 +53,8 @@ const INITIAL_SURVEYS: readonly Survey[] = [
   createInitialSurvey('1', 'Team activities', 'Let’s Plan the Next Team Event Together', 1, {
     featured: true,
     description:
-      'Help us choose an activity, day, and time that make the next team event work for everyone.',
+      'We want to create team activities that everyone will enjoy – share your preferences and ideas in our survey to help us plan better experiences together.',
+    endDate: '2025-09-01',
     questions: TEAM_EVENT_QUESTIONS,
   }),
   createInitialSurvey('2', 'Gaming', 'Gaming habits and favorite games!', 3, {
@@ -86,6 +100,7 @@ export class SurveyStore {
         answers: question.answers.map((answer) => ({
           id: nextTemporaryId('answer'),
           text: answer,
+          voteCount: 0,
         })),
       })),
     };
@@ -103,6 +118,7 @@ function createInitialSurvey(
   daysRemaining: number,
   options: {
     readonly description?: string;
+    readonly endDate?: string | null;
     readonly featured?: boolean;
     readonly questions?: readonly SurveyQuestion[];
   } = {},
@@ -112,7 +128,7 @@ function createInitialSurvey(
     category,
     title,
     description: options.description ?? '',
-    endDate: null,
+    endDate: options.endDate ?? null,
     daysRemaining,
     status: daysRemaining >= 0 ? 'active' : 'past',
     featured: options.featured ?? false,

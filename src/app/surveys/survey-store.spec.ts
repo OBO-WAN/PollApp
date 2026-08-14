@@ -31,13 +31,16 @@ describe('SurveyStore', () => {
     expect(store.surveys().at(-1)).toEqual(created);
     expect(created.daysRemaining).toBeNull();
     expect(created.questions[0].answers).toHaveLength(2);
+    expect(created.questions[0].answers.every((answer) => answer.voteCount === 0)).toBe(true);
   });
 
   it('finds a survey by its route id', () => {
     const survey = store.getSurveyById('1');
 
     expect(survey?.title).toBe('Let’s Plan the Next Team Event Together');
-    expect(survey?.questions).toHaveLength(3);
+    expect(survey?.endDate).toBe('2025-09-01');
+    expect(survey?.questions).toHaveLength(4);
+    expect(survey?.questions[0].answers[1].voteCount).toBe(44);
     expect(store.getSurveyById('missing')).toBeUndefined();
     expect(store.getSurveyById(null)).toBeUndefined();
   });

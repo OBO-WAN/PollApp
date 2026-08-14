@@ -3,14 +3,19 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
-import { Survey } from '../../surveys/survey.model';
+import { Survey, SurveyAnswer, SurveyQuestion } from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
   selector: 'app-survey-detail',
   imports: [RouterLink],
   templateUrl: './survey-detail.html',
-  styleUrls: ['./survey-detail.css', './styles/questions.css', './styles/responsive.css'],
+  styleUrls: [
+    './survey-detail.css',
+    './styles/questions.css',
+    './styles/results.css',
+    './styles/responsive.css',
+  ],
 })
 export class SurveyDetail {
   private readonly route = inject(ActivatedRoute);
@@ -22,22 +27,31 @@ export class SurveyDetail {
 
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
 
-  protected deadlineLabel(survey: Survey): string {
-    if (survey.daysRemaining === null) {
+  protected endDateLabel(survey: Survey): string {
+    if (!survey.endDate) {
       return 'No deadline';
     }
 
-    const days = Math.abs(survey.daysRemaining);
-    const unit = days === 1 ? 'day' : 'days';
+    const [year, month, day] = survey.endDate.split('-');
 
-    return survey.status === 'active' ? `Ends in ${days} ${unit}` : `Ended ${days} ${unit} ago`;
+    return `Ends on ${day}.${month}.${year}`;
   }
 
-  protected questionCountLabel(count: number): string {
-    return `${count} ${count === 1 ? 'question' : 'questions'}`;
+  protected resultPercentage(question: SurveyQuestion, answer: SurveyAnswer): number {
+    const totalVotes = question.answers.reduce((total, current) => total + current.voteCount, 0);
+
+    return totalVotes === 0 ? 0 : Math.round((answer.voteCount / totalVotes) * 100);
   }
 
   protected answerLabel(answerIndex: number): string {
     return String.fromCharCode(65 + answerIndex);
+  }
+
+  protected resultLabel(
+    question: SurveyQuestion,
+    answer: SurveyAnswer,
+    answerIndex: number,
+  ): string {
+    return `${this.answerLabel(answerIndex)}: ${this.resultPercentage(question, answer)} percent`;
   }
 }
