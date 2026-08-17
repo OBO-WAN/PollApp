@@ -71,49 +71,6 @@
   outline-offset: 3px;
 }
 
-.category-filter {
-  position: relative;
-  display: block;
-  width: 206px;
-  height: 32px;
-}
-
-.category-filter select {
-  width: 100%;
-  height: 32px;
-  padding: 4px 36px 4px 10px;
-  border: 0;
-  border-radius: 6px;
-  appearance: none;
-  color: white;
-  background-color: transparent;
-  font-family: var(--font-body);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: normal;
-  cursor: pointer;
-}
-
-.category-filter select:focus-visible {
-  outline: 3px solid white;
-  outline-offset: 3px;
-}
-
-.category-filter select option {
-  color: var(--color-primary-purple);
-  background-color: var(--color-card-background);
-  font-size: 16px;
-}
-
-.category-filter__icon {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-}
-
 .survey-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

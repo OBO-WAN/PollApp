@@ -120,26 +120,53 @@
           </button>
         </div>
 
-        <label class="category-filter">
-          <span class="visually-hidden">Filter surveys by category</span>
+        <div class="category-filter" [class.category-filter--chosen]="selectedCategory() !== 'All'">
+          <button
+            class="category-filter__trigger"
+            type="button"
+            aria-haspopup="listbox"
+            aria-controls="category-filter-options"
+            [attr.aria-expanded]="isCategoryMenuOpen()"
+            [attr.aria-label]="
+              'Filter surveys by category. Current selection: ' + selectedCategory()
+            "
+            (click)="toggleCategoryMenu()"
+            (keydown)="onCategoryTriggerKeydown($event)"
+          >
+            <span>Sort by categories</span>
+            <span
+              class="category-filter__icon"
+              style="--category-arrow: url('assets/images/dropdown-arrow.svg')"
+              aria-hidden="true"
+            ></span>
+          </button>
 
-          <select [value]="selectedCategory()" (change)="selectCategory($event)">
-            <option value="All">Sort by categories</option>
-
-            @for (category of categories(); track category) {
-              @if (category !== 'All') {
-                <option [value]="category">{{ category }}</option>
+          @if (isCategoryMenuOpen()) {
+            <ul
+              id="category-filter-options"
+              class="category-filter__menu"
+              role="listbox"
+              aria-label="Survey categories"
+            >
+              @for (category of categories(); track category; let categoryIndex = $index) {
+                <li
+                  class="category-filter__option"
+                  role="option"
+                  tabindex="0"
+                  [attr.aria-selected]="selectedCategory() === category"
+                  (click)="selectCategory(category)"
+                  (keydown)="onCategoryOptionKeydown($event, categoryIndex)"
+                >
+                  {{ categoryOptionLabel(category) }}
+                </li>
               }
-            }
-          </select>
-
-          <img
-            class="category-filter__icon"
-            src="assets/images/dropdown-arrow.svg"
-            alt=""
-            aria-hidden="true"
-          />
-        </label>
+            </ul>
+          } @else if (selectedCategory() !== 'All') {
+            <p class="category-filter__selection" aria-live="polite">
+              {{ selectedCategory() }}
+            </p>
+          }
+        </div>
       </div>
 
       <div class="survey-list" aria-live="polite">
