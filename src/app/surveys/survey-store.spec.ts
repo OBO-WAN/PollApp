@@ -45,6 +45,39 @@ describe('SurveyStore', () => {
     expect(store.getSurveyById(null)).toBeUndefined();
   });
 
+  it('records a valid vote in memory without mutating unrelated answers', () => {
+    const survey = store.getSurveyById('1');
+    const selections =
+      survey?.questions.map((question) => ({
+        questionId: question.id,
+        answerIds: [question.answers[0].id],
+      })) ?? [];
+
+    expect(store.submitVote('1', selections)).toBe(true);
+
+    const updatedSurvey = store.getSurveyById('1');
+    expect(updatedSurvey?.questions[0].answers[0].voteCount).toBe(28);
+    expect(updatedSurvey?.questions[0].answers[1].voteCount).toBe(44);
+    expect(store.getSurveyById('2')?.questions[0].answers[0].voteCount).toBe(32);
+  });
+
+  it('rejects incomplete or invalid vote selections', () => {
+    const survey = store.getSurveyById('1');
+    const initialVoteCount = survey?.questions[0].answers[0].voteCount;
+
+    expect(store.submitVote('1', [])).toBe(false);
+    expect(
+      store.submitVote(
+        '1',
+        survey?.questions.map((question) => ({
+          questionId: question.id,
+          answerIds: ['unknown-answer'],
+        })) ?? [],
+      ),
+    ).toBe(false);
+    expect(store.getSurveyById('1')?.questions[0].answers[0].voteCount).toBe(initialVoteCount);
+  });
+
   const detailedSurveyCases = [
     {
       id: '1',

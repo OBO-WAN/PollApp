@@ -32,33 +32,71 @@
           <p class="survey-description">{{ currentSurvey.description }}</p>
         </div>
 
-        <ol class="question-grid">
-          @for (question of currentSurvey.questions; track question.id) {
-            <li class="question-item">
-              <h2>{{ question.prompt }}</h2>
+        <form
+          class="survey-form"
+          aria-describedby="vote-instructions vote-status"
+          (submit)="submitVote($event)"
+        >
+          <p id="vote-instructions" class="visually-hidden">
+            Choose at least one answer for every question to complete the survey.
+          </p>
 
-              @if (question.allowMultiple) {
-                <p class="question-hint">More than one answers are possible.</p>
-              }
+          <ol class="question-grid">
+            @for (question of currentSurvey.questions; track question.id) {
+              <li class="question-item">
+                <h2 [id]="'question-' + question.id">{{ question.prompt }}</h2>
 
-              <ul class="answer-list" aria-label="Answer choices">
-                @for (answer of question.answers; track answer.id; let answerIndex = $index) {
-                  <li>
-                    <label class="answer-option">
-                      <input type="checkbox" disabled />
-                      <span>
-                        <strong>{{ answerLabel(answerIndex) }}.</strong>
-                        {{ answer.text }}
-                      </span>
-                    </label>
-                  </li>
+                @if (question.allowMultiple) {
+                  <p [id]="'question-hint-' + question.id" class="question-hint">
+                    More than one answers are possible.
+                  </p>
                 }
-              </ul>
-            </li>
-          }
-        </ol>
 
-        <button class="complete-survey-button" type="button" disabled>Complete survey</button>
+                <ul
+                  class="answer-list"
+                  role="group"
+                  [attr.aria-labelledby]="'question-' + question.id"
+                  [attr.aria-describedby]="
+                    question.allowMultiple ? 'question-hint-' + question.id : null
+                  "
+                >
+                  @for (answer of question.answers; track answer.id; let answerIndex = $index) {
+                    <li>
+                      <label class="answer-option">
+                        <input
+                          [type]="question.allowMultiple ? 'checkbox' : 'radio'"
+                          [name]="'question-' + question.id"
+                          [value]="answer.id"
+                          [checked]="isAnswerSelected(question.id, answer.id)"
+                          [disabled]="hasSubmitted()"
+                          (change)="selectAnswer(question, answer.id)"
+                        />
+                        <span>
+                          <strong>{{ answerLabel(answerIndex) }}.</strong>
+                          {{ answer.text }}
+                        </span>
+                      </label>
+                    </li>
+                  }
+                </ul>
+              </li>
+            }
+          </ol>
+
+          <p id="vote-status" class="visually-hidden" role="status" aria-live="polite">
+            @if (hasSubmitted()) {
+              Your vote has been recorded and the live results have been updated.
+            }
+          </p>
+
+          <button
+            class="complete-survey-button"
+            type="submit"
+            [disabled]="!canSubmit() || hasSubmitted()"
+          >
+            Complete survey
+          </button>
+        </form>
       </section>
 
       <aside class="survey-results" aria-labelledby="survey-results-title">

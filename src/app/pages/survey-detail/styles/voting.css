@@ -1,0 +1,65 @@
+.survey-form {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.answer-option {
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.answer-option:hover {
+  background-color: rgb(255 207 161 / 40%);
+}
+
+.answer-option:focus-within {
+  outline: 2px solid var(--color-primary-orange);
+  outline-offset: 2px;
+}
+
+.answer-option input {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.answer-option input::after {
+  color: var(--color-primary-purple);
+  content: '';
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.answer-option input:checked {
+  border-color: var(--color-primary-orange);
+  background-color: var(--color-primary-orange);
+}
+
+.answer-option input:checked::after {
+  content: '\2713';
+}
+
+.answer-option input:disabled,
+.answer-option:has(input:disabled) {
+  cursor: default;
+}
+
+.answer-option:has(input:disabled):hover {
+  background-color: transparent;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

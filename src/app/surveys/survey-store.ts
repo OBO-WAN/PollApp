@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 import { INITIAL_SURVEYS } from './survey-fixtures';
-import { CreateSurveyInput, Survey } from './survey.model';
+import { CreateSurveyInput, Survey, SurveyVoteSelection } from './survey.model';
 
 let temporaryId = 10;
 
@@ -40,6 +40,74 @@ export class SurveyStore {
 
     return survey;
   }
+
+  submitVote(surveyId: string, selections: readonly SurveyVoteSelection[]): boolean {
+    const survey = this.getSurveyById(surveyId);
+
+    if (!survey || !isValidVote(survey, selections)) {
+      return false;
+    }
+
+    const selectedAnswers = new Map(
+      selections.map((selection) => [selection.questionId, new Set(selection.answerIds)]),
+    );
+
+    this.surveysState.update((surveys) =>
+      surveys.map((currentSurvey) => {
+        if (currentSurvey.id !== surveyId) {
+          return currentSurvey;
+        }
+
+        return {
+          ...currentSurvey,
+          questions: currentSurvey.questions.map((question) => ({
+            ...question,
+            answers: question.answers.map((answer) => ({
+              ...answer,
+              voteCount:
+                answer.voteCount + (selectedAnswers.get(question.id)?.has(answer.id) ? 1 : 0),
+            })),
+          })),
+        };
+      }),
+    );
+
+    return true;
+  }
+}
+
+function isValidVote(survey: Survey, selections: readonly SurveyVoteSelection[]): boolean {
+  if (selections.length !== survey.questions.length) {
+    return false;
+  }
+
+  const selectionsByQuestion = new Map(
+    selections.map((selection) => [selection.questionId, selection.answerIds]),
+  );
+
+  if (selectionsByQuestion.size !== selections.length) {
+    return false;
+  }
+
+  return survey.questions.every((question) => {
+    const answerIds = selectionsByQuestion.get(question.id);
+
+    if (
+      !answerIds ||
+      answerIds.length === 0 ||
+      (!question.allowMultiple && answerIds.length !== 1)
+    ) {
+      return false;
+    }
+
+    const uniqueAnswerIds = new Set(answerIds);
+    const validAnswerIds = new Set(question.answers.map((answer) => answer.id));
+
+    return (
+      uniqueAnswerIds.size === answerIds.length &&
+      answerIds.every((answerId) => validAnswerIds.has(answerId))
+    );
+  });
 }
 
 function nextTemporaryId(prefix: string): string {

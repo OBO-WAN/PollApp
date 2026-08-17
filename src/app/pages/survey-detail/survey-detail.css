@@ -213,6 +213,21 @@
 
 .complete-survey-button:disabled {
   cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.complete-survey-button:not(:disabled) {
+  cursor: pointer;
+}
+
+.complete-survey-button:not(:disabled):hover,
+.complete-survey-button:not(:disabled):focus-visible {
+  background-color: rgb(255 183 112 / 60%);
+}
+
+.complete-survey-button:focus-visible {
+  outline: 3px solid var(--color-primary-purple);
+  outline-offset: 3px;
 }
 
 .not-found {

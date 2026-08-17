@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { SurveyStore } from '../../surveys/survey-store';
 import { SurveyDetail } from './survey-detail';
 
 describe('SurveyDetail', () => {
@@ -19,24 +20,73 @@ describe('SurveyDetail', () => {
     }).compileComponents();
   });
 
-  it('renders the selected survey and its answer choices as read-only content', async () => {
+  it('renders the selected survey as an accessible voting form', async () => {
     const harness = await RouterTestingHarness.create();
 
     await harness.navigateByUrl('/surveys/1', SurveyDetail);
 
     const page = harness.routeNativeElement as HTMLElement;
+    const inputs = [...page.querySelectorAll('.answer-option input')] as HTMLInputElement[];
+
     expect(page.querySelector('h1')?.textContent).toContain(
       'Let’s Plan the Next Team Event Together',
     );
     expect(page.querySelectorAll('.question-item')).toHaveLength(4);
-    expect(page.querySelectorAll('.answer-option')).toHaveLength(16);
-    expect(page.querySelectorAll('.answer-option input:disabled')).toHaveLength(16);
+    expect(inputs).toHaveLength(16);
+    expect(inputs.filter((input) => input.type === 'checkbox')).toHaveLength(9);
+    expect(inputs.filter((input) => input.type === 'radio')).toHaveLength(7);
+    expect(inputs.every((input) => !input.disabled)).toBe(true);
+    expect(page.querySelectorAll('.answer-list[role="group"]')).toHaveLength(4);
     expect(page.querySelectorAll('.result-item')).toHaveLength(4);
     expect(page.querySelector('.survey-results')?.textContent).toContain('86%');
     expect((page.querySelector('.complete-survey-button') as HTMLButtonElement).disabled).toBe(
       true,
     );
-    expect(page.querySelector('form')).toBeNull();
+    expect(page.querySelector('form')).not.toBeNull();
+  });
+
+  it('supports multiple and single selections, records the vote, and updates results', async () => {
+    const harness = await RouterTestingHarness.create();
+    const store = TestBed.inject(SurveyStore);
+
+    await harness.navigateByUrl('/surveys/1', SurveyDetail);
+
+    const page = harness.routeNativeElement as HTMLElement;
+    const questions = [...page.querySelectorAll('.question-item')];
+    const multipleAnswers = questions[0].querySelectorAll('input');
+    const singleAnswers = questions[2].querySelectorAll('input');
+    const completeButton = page.querySelector('.complete-survey-button') as HTMLButtonElement;
+
+    (multipleAnswers[0] as HTMLInputElement).click();
+    (multipleAnswers[2] as HTMLInputElement).click();
+    (singleAnswers[0] as HTMLInputElement).click();
+    (singleAnswers[1] as HTMLInputElement).click();
+    (questions[1].querySelector('input') as HTMLInputElement).click();
+    (questions[3].querySelector('input') as HTMLInputElement).click();
+    harness.detectChanges();
+
+    expect((multipleAnswers[0] as HTMLInputElement).checked).toBe(true);
+    expect((multipleAnswers[2] as HTMLInputElement).checked).toBe(true);
+    expect((singleAnswers[0] as HTMLInputElement).checked).toBe(false);
+    expect((singleAnswers[1] as HTMLInputElement).checked).toBe(true);
+    expect(completeButton.disabled).toBe(false);
+
+    completeButton.click();
+    harness.detectChanges();
+
+    const updatedSurvey = store.getSurveyById('1');
+    const firstResultValues = page
+      .querySelectorAll('.result-item')[0]
+      .querySelectorAll('.result-value');
+
+    expect(updatedSurvey?.questions[0].answers[0].voteCount).toBe(28);
+    expect(updatedSurvey?.questions[0].answers[2].voteCount).toBe(4);
+    expect(firstResultValues[2].textContent?.trim()).toBe('4%');
+    expect(page.querySelector('#vote-status')?.textContent).toContain(
+      'Your vote has been recorded',
+    );
+    expect(page.querySelectorAll('.answer-option input:disabled')).toHaveLength(16);
+    expect(completeButton.disabled).toBe(true);
   });
 
   const additionalSurveyCases = [
@@ -55,7 +105,7 @@ describe('SurveyDetail', () => {
   ] as const;
 
   for (const surveyCase of additionalSurveyCases) {
-    it(`renders unique read-only content for survey ${surveyCase.id}`, async () => {
+    it(`renders unique voting content for survey ${surveyCase.id}`, async () => {
       const harness = await RouterTestingHarness.create();
 
       await harness.navigateByUrl(`/surveys/${surveyCase.id}`, SurveyDetail);
