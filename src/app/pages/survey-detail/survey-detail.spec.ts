@@ -121,6 +121,30 @@ describe('SurveyDetail', () => {
     });
   }
 
+  it('shows a completed survey and its final results as read-only', async () => {
+    const harness = await RouterTestingHarness.create();
+
+    await harness.navigateByUrl('/surveys/7', SurveyDetail);
+
+    const page = harness.routeNativeElement as HTMLElement;
+    const inputs = [...page.querySelectorAll('.answer-option input')] as HTMLInputElement[];
+    const completeButton = page.querySelector('.complete-survey-button') as HTMLButtonElement;
+
+    expect(page.querySelector('h1')?.textContent).toContain('How do you feel about remote work?');
+    expect(page.querySelector('.published-badge')?.textContent).toContain('Past survey');
+    expect(page.querySelector('.survey-heading__meta')?.textContent).toContain('Ended on');
+    expect(page.querySelectorAll('.question-item')).toHaveLength(2);
+    expect(page.querySelectorAll('.result-item')).toHaveLength(2);
+    expect(inputs).toHaveLength(7);
+    expect(inputs.every((input) => input.disabled)).toBe(true);
+    expect(completeButton.textContent).toContain('Survey closed');
+    expect(completeButton.disabled).toBe(true);
+    expect(page.querySelector('.survey-closed-notice')?.textContent).toContain(
+      'Final results are shown below',
+    );
+    expect(page.querySelector('#survey-results-title')?.textContent).not.toContain('LIVE');
+  });
+
   it('shows a useful not-found state for an unknown survey id', async () => {
     const harness = await RouterTestingHarness.create();
 

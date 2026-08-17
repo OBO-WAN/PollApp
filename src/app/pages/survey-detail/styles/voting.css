@@ -4,6 +4,20 @@
   flex-direction: column;
 }
 
+.published-badge--past {
+  background-color: rgb(142 112 153 / 30%);
+}
+
+.survey-closed-notice {
+  width: 100%;
+  margin: 24px 0 0;
+  padding: 12px 16px;
+  border-left: 4px solid var(--color-primary-orange);
+  background-color: rgb(255 183 112 / 20%);
+  font-size: 15px;
+  font-weight: 600;
+}
+
 .answer-option {
   border-radius: 3px;
   cursor: pointer;

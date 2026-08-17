@@ -20,7 +20,9 @@
   <main class="survey-layout">
     @if (survey(); as currentSurvey) {
       <section class="survey-card" aria-labelledby="survey-title">
-        <span class="published-badge">Published</span>
+        <span class="published-badge" [class.published-badge--past]="isReadOnly()">
+          {{ isReadOnly() ? 'Past survey' : 'Published' }}
+        </span>
 
         <div class="survey-heading">
           <div class="survey-heading__meta">
@@ -38,8 +40,18 @@
           (submit)="submitVote($event)"
         >
           <p id="vote-instructions" class="visually-hidden">
-            Choose at least one answer for every question to complete the survey.
+            @if (isReadOnly()) {
+              This survey has ended. Its answers and final results are read-only.
+            } @else {
+              Choose at least one answer for every question to complete the survey.
+            }
           </p>
+
+          @if (isReadOnly()) {
+            <p class="survey-closed-notice">
+              This survey has ended. Final results are shown below.
+            </p>
+          }
 
           <ol class="question-grid">
             @for (question of currentSurvey.questions; track question.id) {
@@ -68,7 +80,7 @@
                           [name]="'question-' + question.id"
                           [value]="answer.id"
                           [checked]="isAnswerSelected(question.id, answer.id)"
-                          [disabled]="hasSubmitted()"
+                          [disabled]="isReadOnly() || hasSubmitted()"
                           (change)="selectAnswer(question, answer.id)"
                         />
                         <span>
@@ -92,15 +104,20 @@
           <button
             class="complete-survey-button"
             type="submit"
-            [disabled]="!canSubmit() || hasSubmitted()"
+            [disabled]="isReadOnly() || !canSubmit() || hasSubmitted()"
           >
-            Complete survey
+            {{ isReadOnly() ? 'Survey closed' : 'Complete survey' }}
           </button>
         </form>
       </section>
 
       <aside class="survey-results" aria-labelledby="survey-results-title">
-        <h2 id="survey-results-title">Survey results <span>LIVE</span></h2>
+        <h2 id="survey-results-title">
+          Survey results
+          @if (!isReadOnly()) {
+            <span>LIVE</span>
+          }
+        </h2>
 
         <ol class="result-list">
           @for (question of currentSurvey.questions; track question.id) {

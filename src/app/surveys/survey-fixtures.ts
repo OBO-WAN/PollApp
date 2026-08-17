@@ -1,4 +1,9 @@
 import { Survey, SurveyQuestion } from './survey.model';
+import {
+  REMOTE_WORK_QUESTIONS,
+  SUMMER_EVENT_QUESTIONS,
+  WELLNESS_CHECK_IN_QUESTIONS,
+} from './past-survey-fixtures';
 
 const TEAM_EVENT_QUESTIONS: readonly SurveyQuestion[] = [
   {
@@ -148,7 +153,6 @@ export const INITIAL_SURVEYS: readonly Survey[] = [
     'Team activities',
     'Let’s Plan the Next Team Event Together',
     1,
-    '2025-09-01',
     'We want to create team activities that everyone will enjoy – share your preferences and ideas in our survey to help us plan better experiences together.',
     TEAM_EVENT_QUESTIONS,
   ),
@@ -157,7 +161,6 @@ export const INITIAL_SURVEYS: readonly Survey[] = [
     'Gaming & Entertainment',
     'Gaming habits and favorite games!',
     3,
-    '2025-09-03',
     'We’d like to learn more about your gaming habits, favorite genres and preferred ways to play.',
     GAMING_QUESTIONS,
   ),
@@ -166,14 +169,12 @@ export const INITIAL_SURVEYS: readonly Survey[] = [
     'Gaming & Entertainment',
     'Which games should we play at our next community night?',
     7,
-    '2025-09-07',
   ),
   createSurveyFixture(
     '4',
     'Health & Wellness',
     'Healthier future: Fit & wellness survey!',
     2,
-    '2025-09-02',
     'Help us understand which health and wellness topics matter most to you and what could support a healthier everyday routine.',
     WELLNESS_QUESTIONS,
   ),
@@ -182,18 +183,32 @@ export const INITIAL_SURVEYS: readonly Survey[] = [
     'Health & Wellness',
     'Which wellness activities should we offer next?',
     9,
-    '2025-09-09',
+  ),
+  createSurveyFixture('6', 'Team activities', 'Help us choose the next team-building activity', 12),
+  createSurveyFixture(
+    '7',
+    'Workplace culture',
+    'How do you feel about remote work?',
+    -4,
+    'This survey gathered feedback about remote-work routines, flexibility and the places where our team works best.',
+    REMOTE_WORK_QUESTIONS,
   ),
   createSurveyFixture(
-    '6',
+    '8',
     'Team activities',
-    'Help us choose the next team-building activity',
-    12,
-    '2025-09-12',
+    'Summer team event retrospective',
+    -7,
+    'Thank you for joining our summer event. These final results show what the team enjoyed and what we can improve next time.',
+    SUMMER_EVENT_QUESTIONS,
   ),
-  createSurveyFixture('7', 'Workplace culture', 'How do you feel about remote work?', -4),
-  createSurveyFixture('8', 'Team activities', 'Summer team event retrospective', -7),
-  createSurveyFixture('9', 'Health & Wellness', 'Weekly wellness check-in', -12),
+  createSurveyFixture(
+    '9',
+    'Health & Wellness',
+    'Weekly wellness check-in',
+    -12,
+    'This completed check-in reflects how the team felt during the week and which habits supported everyone’s well-being.',
+    WELLNESS_CHECK_IN_QUESTIONS,
+  ),
 ];
 
 function createSurveyFixture(
@@ -201,7 +216,6 @@ function createSurveyFixture(
   category: string,
   title: string,
   daysRemaining: number,
-  endDate: string | null = null,
   description = '',
   questions: readonly SurveyQuestion[] = [],
 ): Survey {
@@ -210,9 +224,21 @@ function createSurveyFixture(
     category,
     title,
     description,
-    endDate,
+    endDate: dateFromToday(daysRemaining),
     daysRemaining,
     status: daysRemaining >= 0 ? 'active' : 'past',
     questions,
   };
+}
+
+function dateFromToday(daysRemaining: number): string {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + daysRemaining);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
