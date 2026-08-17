@@ -2,14 +2,11 @@
 
 .highlight-card {
   text-decoration: none;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+  transition: background-color 180ms ease;
 }
 
 .highlight-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgb(0 0 0 / 18%);
+  background-color: #f4e9fb;
 }
 
 .highlight-card:focus-visible {
@@ -137,14 +134,11 @@
   color: white;
   background-color: rgb(217 217 217 / 8%);
   text-decoration: none;
-  transition:
-    background-color 180ms ease,
-    transform 180ms ease;
+  transition: background-color 180ms ease;
 }
 
 .survey-list-card:hover {
-  background-color: rgb(217 217 217 / 14%);
-  transform: translateY(-2px);
+  background-color: rgb(217 217 217 / 16%);
 }
 
 .survey-list-card:focus-visible {
