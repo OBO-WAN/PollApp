@@ -60,4 +60,53 @@ describe('Home', () => {
     ]);
     expect(surveyLink.getAttribute('href')).toBe('/surveys/1');
   });
+
+  it('opens the category listbox and filters surveys by the selected option', () => {
+    const page = fixture.nativeElement as HTMLElement;
+    const trigger = page.querySelector('.category-filter__trigger') as HTMLButtonElement;
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(page.querySelector('.category-filter__menu')).toBeNull();
+
+    trigger.click();
+    fixture.detectChanges();
+
+    const options = [...page.querySelectorAll('.category-filter__option')] as HTMLElement[];
+    const teamActivitiesOption = options.find(
+      (option) => option.textContent?.trim() === 'Team activities',
+    );
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(page.querySelector('.category-filter__menu')?.getAttribute('role')).toBe('listbox');
+    expect(options).toHaveLength(5);
+
+    teamActivitiesOption?.click();
+    fixture.detectChanges();
+
+    const visibleCategories = [...page.querySelectorAll('.survey-list-card__category')].map(
+      (category) => category.textContent?.trim(),
+    );
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(page.querySelector('.category-filter__menu')).toBeNull();
+    expect(page.querySelector('.category-filter__selection')?.textContent).toContain(
+      'Team activities',
+    );
+    expect(visibleCategories).toEqual(['Team activities', 'Team activities']);
+  });
+
+  it('supports keyboard opening and closing for the category listbox', () => {
+    const page = fixture.nativeElement as HTMLElement;
+    const trigger = page.querySelector('.category-filter__trigger') as HTMLButtonElement;
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+
+    const firstOption = page.querySelector('.category-filter__option') as HTMLElement;
+    firstOption.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(page.querySelector('.category-filter__menu')).toBeNull();
+  });
 });
