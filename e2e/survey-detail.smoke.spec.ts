@@ -75,3 +75,24 @@ test('submits a vote once and refreshes the live results', async ({ page }) => {
   await expect(page.locator('.answer-option input').first()).toBeDisabled();
   await expect(completeButton).toBeDisabled();
 });
+
+test('opens a past survey with final results and no voting controls enabled', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByRole('button', { name: 'Past survey' }).click();
+  await page.getByRole('link', { name: 'View survey: How do you feel about remote work?' }).click();
+
+  await expect(page).toHaveURL(/\/surveys\/7$/);
+  await expect(
+    page.getByRole('heading', { name: 'How do you feel about remote work?' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('This survey has ended. Final results are shown below.'),
+  ).toBeVisible();
+  await expect(page.locator('.question-item')).toHaveCount(2);
+  await expect(page.locator('.answer-option input')).toHaveCount(7);
+  await expect(page.locator('.answer-option input').first()).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Survey closed' })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: 'Survey results', exact: true })).toBeVisible();
+  await expect(page.getByText('LIVE', { exact: true })).toHaveCount(0);
+});

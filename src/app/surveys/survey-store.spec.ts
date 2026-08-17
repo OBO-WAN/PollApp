@@ -36,9 +36,13 @@ describe('SurveyStore', () => {
 
   it('finds a survey by its route id', () => {
     const survey = store.getSurveyById('1');
+    const tomorrow = new Date();
+    tomorrow.setHours(0, 0, 0, 0);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     expect(survey?.title).toBe('Let’s Plan the Next Team Event Together');
-    expect(survey?.endDate).toBe('2025-09-01');
+    expect(survey?.endDate).toBe(formatDate(tomorrow));
+    expect(survey?.daysRemaining).toBe(1);
     expect(survey?.questions).toHaveLength(4);
     expect(survey?.questions[0].answers[1].voteCount).toBe(44);
     expect(store.getSurveyById('missing')).toBeUndefined();
@@ -76,6 +80,19 @@ describe('SurveyStore', () => {
       ),
     ).toBe(false);
     expect(store.getSurveyById('1')?.questions[0].answers[0].voteCount).toBe(initialVoteCount);
+  });
+
+  it('rejects votes for a past survey without changing its final results', () => {
+    const survey = store.getSurveyById('7');
+    const selections =
+      survey?.questions.map((question) => ({
+        questionId: question.id,
+        answerIds: [question.answers[0].id],
+      })) ?? [];
+    const initialVoteCount = survey?.questions[0].answers[0].voteCount;
+
+    expect(store.submitVote('7', selections)).toBe(false);
+    expect(store.getSurveyById('7')?.questions[0].answers[0].voteCount).toBe(initialVoteCount);
   });
 
   const detailedSurveyCases = [
@@ -123,4 +140,20 @@ describe('SurveyStore', () => {
     expect(prompts).toHaveLength(12);
     expect(new Set(prompts).size).toBe(prompts.length);
   });
+
+  it('provides final results for every past survey', () => {
+    const pastSurveys = ['7', '8', '9'].map((id) => store.getSurveyById(id));
+
+    expect(pastSurveys.every((survey) => survey?.status === 'past')).toBe(true);
+    expect(pastSurveys.every((survey) => survey?.description !== '')).toBe(true);
+    expect(pastSurveys.every((survey) => survey?.questions.length === 2)).toBe(true);
+  });
 });
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}

@@ -34,12 +34,14 @@ export class SurveyDetail {
   private readonly submittedSurveyId = signal<string | null>(null);
 
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
+  protected readonly isReadOnly = computed(() => this.survey()?.status === 'past');
   protected readonly canSubmit = computed(() => {
     const survey = this.survey();
     const selectedAnswers = this.selectedAnswersState();
 
     return (
       !!survey &&
+      survey.status === 'active' &&
       survey.questions.length > 0 &&
       survey.questions.every((question) => (selectedAnswers[question.id]?.length ?? 0) > 0)
     );
@@ -53,7 +55,7 @@ export class SurveyDetail {
 
     const [year, month, day] = survey.endDate.split('-');
 
-    return `Ends on ${day}.${month}.${year}`;
+    return `${survey.status === 'past' ? 'Ended' : 'Ends'} on ${day}.${month}.${year}`;
   }
 
   protected resultPercentage(question: SurveyQuestion, answer: SurveyAnswer): number {
@@ -71,7 +73,7 @@ export class SurveyDetail {
   }
 
   protected selectAnswer(question: SurveyQuestion, answerId: string): void {
-    if (this.hasSubmitted()) {
+    if (this.isReadOnly() || this.hasSubmitted()) {
       return;
     }
 
@@ -93,7 +95,7 @@ export class SurveyDetail {
 
     const survey = this.survey();
 
-    if (!survey || !this.canSubmit() || this.hasSubmitted()) {
+    if (!survey || this.isReadOnly() || !this.canSubmit() || this.hasSubmitted()) {
       return;
     }
 

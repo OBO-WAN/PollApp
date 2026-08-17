@@ -44,7 +44,7 @@ export class SurveyStore {
   submitVote(surveyId: string, selections: readonly SurveyVoteSelection[]): boolean {
     const survey = this.getSurveyById(surveyId);
 
-    if (!survey || !isValidVote(survey, selections)) {
+    if (!survey || survey.status !== 'active' || !isValidVote(survey, selections)) {
       return false;
     }
 
