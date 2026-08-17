@@ -39,18 +39,25 @@ describe('Home', () => {
     expect(navigate).toHaveBeenCalledWith('/surveys/new');
   });
 
-  it('links survey cards to their read-only detail pages', () => {
-    const featuredLink = fixture.nativeElement.querySelector(
-      '.highlight-card',
-    ) as HTMLAnchorElement;
+  it('shows the three earliest active surveys in deadline order', () => {
+    const highlightLinks = [
+      ...fixture.nativeElement.querySelectorAll('.highlight-card'),
+    ] as HTMLAnchorElement[];
     const surveyLink = fixture.nativeElement.querySelector(
       '.survey-list-card',
     ) as HTMLAnchorElement;
 
-    expect(featuredLink.getAttribute('href')).toBe('/surveys/1');
-    expect(featuredLink.getAttribute('aria-label')).toContain(
+    expect(highlightLinks).toHaveLength(3);
+    expect(highlightLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/surveys/1',
+      '/surveys/4',
+      '/surveys/2',
+    ]);
+    expect(highlightLinks.map((link) => link.querySelector('h4')?.textContent?.trim())).toEqual([
       'Let’s Plan the Next Team Event Together',
-    );
+      'Healthier future: Fit & wellness survey!',
+      'Gaming habits and favorite games!',
+    ]);
     expect(surveyLink.getAttribute('href')).toBe('/surveys/1');
   });
 });

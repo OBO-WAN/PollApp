@@ -21,7 +21,6 @@ export interface Survey {
   readonly endDate: string | null;
   readonly daysRemaining: number | null;
   readonly status: SurveyStatus;
-  readonly featured: boolean;
   readonly questions: readonly SurveyQuestion[];
 }
 
@@ -41,7 +40,7 @@ export interface CreateSurveyInput {
 
 export const SURVEY_CATEGORIES = [
   'Team activities',
-  'Gaming',
-  'Healthy Lifestyle',
+  'Gaming & Entertainment',
+  'Health & Wellness',
   'Workplace culture',
 ] as const;

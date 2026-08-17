@@ -44,4 +44,50 @@ describe('SurveyStore', () => {
     expect(store.getSurveyById('missing')).toBeUndefined();
     expect(store.getSurveyById(null)).toBeUndefined();
   });
+
+  const detailedSurveyCases = [
+    {
+      id: '1',
+      title: 'Let’s Plan the Next Team Event Together',
+      firstQuestion: 'Which date would work best for you?',
+      answerCount: 16,
+    },
+    {
+      id: '2',
+      title: 'Gaming habits and favorite games!',
+      firstQuestion: 'How often do you play video games?',
+      answerCount: 17,
+    },
+    {
+      id: '4',
+      title: 'Healthier future: Fit & wellness survey!',
+      firstQuestion: 'Which wellness goals are most important to you?',
+      answerCount: 16,
+    },
+  ] as const;
+
+  for (const surveyCase of detailedSurveyCases) {
+    it(`provides unique detail content for survey ${surveyCase.id}`, () => {
+      const survey = store.getSurveyById(surveyCase.id);
+
+      expect(survey?.title).toBe(surveyCase.title);
+      expect(survey?.description).not.toBe('');
+      expect(survey?.questions).toHaveLength(4);
+      expect(survey?.questions[0].prompt).toBe(surveyCase.firstQuestion);
+      expect(
+        survey?.questions.reduce((count, question) => count + question.answers.length, 0),
+      ).toBe(surveyCase.answerCount);
+    });
+  }
+
+  it('keeps every ending-soon question unique to its survey', () => {
+    const surveys = ['1', '4', '2'].map((id) => store.getSurveyById(id));
+    const prompts = surveys.flatMap((survey) =>
+      survey ? survey.questions.map((question) => question.prompt) : [],
+    );
+
+    expect(surveys.every((survey) => survey !== undefined)).toBe(true);
+    expect(prompts).toHaveLength(12);
+    expect(new Set(prompts).size).toBe(prompts.length);
+  });
 });
