@@ -17,14 +17,9 @@ export class Home {
 
   protected readonly endingSoonSurveys = computed(() =>
     [...this.surveys()]
-      .filter(
-        (survey) => survey.status === 'active' && survey.featured && survey.daysRemaining !== null,
-      )
-      .sort(
-        (first, second) =>
-          (first.daysRemaining ?? Number.POSITIVE_INFINITY) -
-          (second.daysRemaining ?? Number.POSITIVE_INFINITY),
-      ),
+      .filter((survey) => survey.status === 'active' && survey.endDate !== null)
+      .sort((first, second) => (first.endDate ?? '').localeCompare(second.endDate ?? ''))
+      .slice(0, 3),
   );
 
   protected readonly categories = computed<readonly string[]>(() => [
