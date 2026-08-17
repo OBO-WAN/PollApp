@@ -14,6 +14,7 @@ import { SurveyStore } from '../../surveys/survey-store';
     './styles/dropdown.css',
     './styles/motion.css',
     './styles/button.css',
+    './styles/responsive.css',
   ],
 })
 export class Home {
