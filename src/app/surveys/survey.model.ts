@@ -13,6 +13,11 @@ export interface SurveyQuestion {
   readonly answers: readonly SurveyAnswer[];
 }
 
+export interface SurveyVoteSelection {
+  readonly questionId: string;
+  readonly answerIds: readonly string[];
+}
+
 export interface Survey {
   readonly id: string;
   readonly category: string;

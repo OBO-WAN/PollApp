@@ -1,9 +1,14 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
-import { Survey, SurveyAnswer, SurveyQuestion } from '../../surveys/survey.model';
+import {
+  Survey,
+  SurveyAnswer,
+  SurveyQuestion,
+  SurveyVoteSelection,
+} from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
@@ -13,6 +18,7 @@ import { SurveyStore } from '../../surveys/survey-store';
   styleUrls: [
     './survey-detail.css',
     './styles/questions.css',
+    './styles/voting.css',
     './styles/results.css',
     './styles/responsive.css',
   ],
@@ -24,8 +30,21 @@ export class SurveyDetail {
     this.route.paramMap.pipe(map((parameters) => parameters.get('surveyId'))),
     { initialValue: this.route.snapshot.paramMap.get('surveyId') },
   );
+  private readonly selectedAnswersState = signal<Readonly<Record<string, readonly string[]>>>({});
+  private readonly submittedSurveyId = signal<string | null>(null);
 
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
+  protected readonly canSubmit = computed(() => {
+    const survey = this.survey();
+    const selectedAnswers = this.selectedAnswersState();
+
+    return (
+      !!survey &&
+      survey.questions.length > 0 &&
+      survey.questions.every((question) => (selectedAnswers[question.id]?.length ?? 0) > 0)
+    );
+  });
+  protected readonly hasSubmitted = computed(() => this.submittedSurveyId() === this.survey()?.id);
 
   protected endDateLabel(survey: Survey): string {
     if (!survey.endDate) {
@@ -47,6 +66,47 @@ export class SurveyDetail {
     return String.fromCharCode(65 + answerIndex);
   }
 
+  protected isAnswerSelected(questionId: string, answerId: string): boolean {
+    return this.selectedAnswersState()[questionId]?.includes(answerId) ?? false;
+  }
+
+  protected selectAnswer(question: SurveyQuestion, answerId: string): void {
+    if (this.hasSubmitted()) {
+      return;
+    }
+
+    this.selectedAnswersState.update((currentSelections) => {
+      const selectedForQuestion = currentSelections[question.id] ?? [];
+      const nextSelection = question.allowMultiple
+        ? toggleAnswer(selectedForQuestion, answerId)
+        : [answerId];
+
+      return {
+        ...currentSelections,
+        [question.id]: nextSelection,
+      };
+    });
+  }
+
+  protected submitVote(event: Event): void {
+    event.preventDefault();
+
+    const survey = this.survey();
+
+    if (!survey || !this.canSubmit() || this.hasSubmitted()) {
+      return;
+    }
+
+    const selections: readonly SurveyVoteSelection[] = survey.questions.map((question) => ({
+      questionId: question.id,
+      answerIds: this.selectedAnswersState()[question.id] ?? [],
+    }));
+
+    if (this.surveyStore.submitVote(survey.id, selections)) {
+      this.submittedSurveyId.set(survey.id);
+    }
+  }
+
   protected resultLabel(
     question: SurveyQuestion,
     answer: SurveyAnswer,
@@ -54,4 +114,10 @@ export class SurveyDetail {
   ): string {
     return `${this.answerLabel(answerIndex)}: ${this.resultPercentage(question, answer)} percent`;
   }
+}
+
+function toggleAnswer(selectedAnswers: readonly string[], answerId: string): readonly string[] {
+  return selectedAnswers.includes(answerId)
+    ? selectedAnswers.filter((selectedAnswerId) => selectedAnswerId !== answerId)
+    : [...selectedAnswers, answerId];
 }
