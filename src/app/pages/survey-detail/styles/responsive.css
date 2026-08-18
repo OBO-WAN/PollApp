@@ -1,3 +1,16 @@
+.survey-status-row {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.survey-close-link,
+.complete-survey-button__mobile-label,
+.complete-survey-button img {
+  display: none;
+}
+
 @media (max-width: 1120px) {
   .survey-layout {
     grid-template-columns: minmax(0, 688px);
@@ -16,46 +29,84 @@
 
 @media (max-width: 760px) {
   .survey-detail-page {
-    padding-top: 24px;
+    padding: 48px 0 32px;
   }
 
-  .app-header,
-  .survey-layout {
+  .app-header {
     width: calc(100% - 32px);
   }
 
-  .app-logo {
-    transform: scale(0.82);
-    transform-origin: left top;
-  }
-
   .create-survey-link {
-    min-height: 42px;
-    padding: 9px 12px;
-    font-size: 16px;
+    display: none;
   }
 
   .survey-layout {
-    gap: 48px;
-    margin-top: 28px;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 56px;
+    margin-top: 54px;
   }
 
   .survey-card {
-    width: 100%;
-    padding: 32px 24px;
+    width: min(343px, calc(100% - 32px));
+    padding: 40px 11.5px;
+    margin-inline: auto;
     border-top-right-radius: 100px;
   }
 
+  .survey-status-row {
+    width: calc(100% - 13px);
+  }
+
+  .published-badge {
+    margin-top: 3px;
+  }
+
+  .survey-close-link {
+    display: inline-flex;
+    width: 39px;
+    min-height: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 7px;
+    border-radius: 10px;
+    background-color: var(--color-secondary-orange);
+  }
+
+  .survey-close-link:hover,
+  .survey-close-link:focus-visible {
+    background-color: var(--color-primary-orange);
+  }
+
+  .survey-close-link:focus-visible,
+  .results-toggle:focus-visible {
+    outline: 3px solid var(--color-primary-purple);
+    outline-offset: 3px;
+  }
+
+  .survey-heading {
+    margin-top: 16px;
+  }
+
   .survey-heading__meta {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    gap: 8px;
+    font-size: clamp(12px, 3.73vw, 14px);
+  }
+
+  .survey-heading__meta p:last-child {
+    text-align: right;
   }
 
   .survey-heading h1 {
     min-height: 0;
-    font-size: 46px;
-    line-height: 43px;
+    margin-top: 16px;
+    font-size: clamp(42px, 12.8vw, 48px);
+    line-height: 42px;
+  }
+
+  .survey-description {
+    margin-top: 24px;
   }
 
   .question-grid,
@@ -63,39 +114,75 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .result-bars li {
-    grid-template-columns: 15px minmax(0, 1fr) 33px;
-  }
-}
-
-@media (max-width: 420px) {
-  .app-header {
-    align-items: center;
-  }
-
-  .app-logo {
-    width: 100px;
-  }
-
-  .survey-card {
-    padding: 28px 16px;
-    border-top-right-radius: 72px;
-  }
-
-  .survey-heading h1 {
-    font-size: 40px;
-    line-height: 38px;
-  }
-
-  .survey-description {
-    font-size: 15px;
-  }
-
   .question-grid {
-    gap: 36px;
+    gap: 24px;
   }
 
-  .answer-option {
+  .complete-survey-button {
+    min-height: 48px;
     gap: 10px;
+    padding: 12px 16px;
+    background-color: var(--color-primary-orange);
+    font-size: 18px;
   }
+
+  .complete-survey-button__desktop-label {
+    display: none;
+  }
+
+  .complete-survey-button__mobile-label,
+  .complete-survey-button img {
+    display: block;
+  }
+
+  .survey-results {
+    width: min(315px, calc(100% - 32px));
+    margin-inline: auto;
+  }
+
+  .results-toggle {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 4px 6px 4px 10px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--color-primary-purple);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .results-toggle:hover,
+  .results-toggle:focus-visible {
+    background-color: rgb(255 207 161 / 40%);
+  }
+
+  .results-toggle__arrow {
+    display: block;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    background-color: currentColor;
+    mask: var(--arrow-icon) center / 24px 24px no-repeat;
+    -webkit-mask: var(--arrow-icon) center / 24px 24px no-repeat;
+    transition: transform 160ms ease;
+  }
+
+  .results-toggle__arrow--expanded {
+    transform: rotate(180deg);
+  }
+
+  .results-panel {
+    display: none;
+    margin-top: 24px;
+  }
+
+  .results-panel--expanded {
+    display: block;
+  }
+
 }

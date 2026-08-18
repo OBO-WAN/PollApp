@@ -20,9 +20,15 @@
   <main class="survey-layout">
     @if (survey(); as currentSurvey) {
       <section class="survey-card" aria-labelledby="survey-title">
-        <span class="published-badge" [class.published-badge--past]="isReadOnly()">
-          {{ isReadOnly() ? 'Past survey' : 'Published' }}
-        </span>
+        <div class="survey-status-row">
+          <span class="published-badge" [class.published-badge--past]="isReadOnly()">
+            {{ isReadOnly() ? 'Past survey' : 'Published' }}
+          </span>
+
+          <a class="survey-close-link" routerLink="/" aria-label="Close survey and return home">
+            <img src="assets/images/create-survey/close.svg" alt="" />
+          </a>
+        </div>
 
         <div class="survey-heading">
           <div class="survey-heading__meta">
@@ -106,45 +112,73 @@
             type="submit"
             [disabled]="isReadOnly() || !canSubmit() || hasSubmitted()"
           >
-            {{ isReadOnly() ? 'Survey closed' : 'Complete survey' }}
+            @if (isReadOnly()) {
+              <span>Survey closed</span>
+            } @else {
+              <span class="complete-survey-button__desktop-label">Complete survey</span>
+              <span class="complete-survey-button__mobile-label">Complete</span>
+              <img src="assets/images/survey-complete-check.svg" alt="" />
+            }
           </button>
         </form>
       </section>
 
       <aside class="survey-results" aria-labelledby="survey-results-title">
-        <h2 id="survey-results-title">
-          Survey results
-          @if (!isReadOnly()) {
-            <span>LIVE</span>
-          }
-        </h2>
+        <button
+          class="results-toggle"
+          type="button"
+          aria-controls="survey-results-panel"
+          [attr.aria-expanded]="resultsExpanded()"
+          (click)="toggleResults()"
+        >
+          {{ resultsExpanded() ? 'Close results' : 'See results' }}
+          <span
+            class="results-toggle__arrow"
+            [class.results-toggle__arrow--expanded]="resultsExpanded()"
+            style="--arrow-icon: url('assets/images/dropdown-arrow.svg')"
+            aria-hidden="true"
+          ></span>
+        </button>
 
-        <ol class="result-list">
-          @for (question of currentSurvey.questions; track question.id) {
-            <li class="result-item">
-              <h3>{{ question.prompt }}</h3>
+        <div
+          id="survey-results-panel"
+          class="results-panel"
+          [class.results-panel--expanded]="resultsExpanded()"
+        >
+          <h2 id="survey-results-title">
+            Survey results
+            @if (!isReadOnly()) {
+              <span>LIVE</span>
+            }
+          </h2>
 
-              <ul class="result-bars">
-                @for (answer of question.answers; track answer.id; let answerIndex = $index) {
-                  <li>
-                    <span class="result-letter">{{ answerLabel(answerIndex) }}</span>
-                    <span
-                      class="result-track"
-                      role="img"
-                      [attr.aria-label]="resultLabel(question, answer, answerIndex)"
-                    >
+          <ol class="result-list">
+            @for (question of currentSurvey.questions; track question.id) {
+              <li class="result-item">
+                <h3>{{ question.prompt }}</h3>
+
+                <ul class="result-bars">
+                  @for (answer of question.answers; track answer.id; let answerIndex = $index) {
+                    <li>
+                      <span class="result-letter">{{ answerLabel(answerIndex) }}</span>
                       <span
-                        class="result-fill"
-                        [style.width.%]="resultPercentage(question, answer)"
-                      ></span>
-                    </span>
-                    <span class="result-value">{{ resultPercentage(question, answer) }}%</span>
-                  </li>
-                }
-              </ul>
-            </li>
-          }
-        </ol>
+                        class="result-track"
+                        role="img"
+                        [attr.aria-label]="resultLabel(question, answer, answerIndex)"
+                      >
+                        <span
+                          class="result-fill"
+                          [style.width.%]="resultPercentage(question, answer)"
+                        ></span>
+                      </span>
+                      <span class="result-value">{{ resultPercentage(question, answer) }}%</span>
+                    </li>
+                  }
+                </ul>
+              </li>
+            }
+          </ol>
+        </div>
       </aside>
     } @else {
       <section class="not-found" aria-labelledby="not-found-title">
