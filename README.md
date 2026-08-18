@@ -49,10 +49,21 @@ ng test
 For end-to-end (e2e) testing, run:
 
 ```bash
-ng e2e
+npm run test:e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+The Playwright suite covers the main survey workflows and responsive viewports.
+
+## Supabase database
+
+The initial database contract lives in [`supabase/`](supabase/README.md). It includes:
+
+- relational survey, question, answer, vote, and result tables;
+- transactional functions for creating surveys and submitting votes;
+- anonymous read policies with writes restricted to those functions;
+- seed data matching the current Angular survey fixtures.
+
+Authentication and the Angular Supabase adapter are intentionally outside this schema-only change.
 
 ## Additional Resources
 
