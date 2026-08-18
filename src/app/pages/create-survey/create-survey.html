@@ -1,4 +1,20 @@
 <div class="create-survey-page">
+  <header class="create-page-header">
+    <a class="create-page-logo" routerLink="/" aria-label="Poll App home">
+      <span class="create-page-logo__mark" aria-hidden="true">
+        <span
+          class="create-page-logo__bubble"
+          style="--logo-mask: url('assets/images/logo-mark.svg')"
+        ></span>
+        <span class="create-page-logo__details">
+          <span><i></i><b></b></span>
+          <span><i></i><b></b></span>
+        </span>
+      </span>
+      <span class="create-page-logo__name"><span>Poll</span><span>App</span></span>
+    </a>
+  </header>
+
   <main class="survey-editor" aria-labelledby="create-survey-title">
     <header class="editor-header">
       <div>
@@ -6,7 +22,10 @@
         <h1 id="create-survey-title">Create new survey</h1>
       </div>
 
-      <a class="cancel-button" routerLink="/">Cancel</a>
+      <a class="cancel-button" routerLink="/">
+        <span>Cancel</span>
+        <img src="assets/images/create-survey/close.svg" alt="" />
+      </a>
     </header>
 
     <form [formGroup]="surveyForm" (ngSubmit)="publish()" novalidate>
@@ -90,7 +109,7 @@
                     [attr.aria-invalid]="showError(surveyForm.controls.category)"
                     aria-describedby="survey-category-error"
                   >
-                    <option value="" disabled>Select category</option>
+                    <option value="" disabled>Choose category</option>
 
                     @for (category of categories; track category) {
                       <option [value]="category">{{ category }}</option>
