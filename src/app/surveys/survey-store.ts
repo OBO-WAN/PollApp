@@ -1,132 +1,102 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 
-import { INITIAL_SURVEYS } from './survey-fixtures';
 import { CreateSurveyInput, Survey, SurveyVoteSelection } from './survey.model';
-
-let temporaryId = 10;
+import { SURVEY_REPOSITORY } from './survey.repository';
 
 @Injectable({ providedIn: 'root' })
 export class SurveyStore {
-  private readonly surveysState = signal<readonly Survey[]>(INITIAL_SURVEYS);
+  private readonly repository = inject(SURVEY_REPOSITORY);
+  private readonly surveysState = signal<readonly Survey[]>([]);
+  private readonly pendingRequests = signal(0);
+  private readonly errorState = signal<string | null>(null);
 
   readonly surveys = this.surveysState.asReadonly();
+  readonly isLoading = computed(() => this.pendingRequests() > 0);
+  readonly error = this.errorState.asReadonly();
+
+  async loadSurveys(): Promise<void> {
+    const surveys = await this.execute('Unable to load surveys.', () =>
+      this.repository.listSurveys(),
+    );
+
+    this.surveysState.set(surveys);
+  }
+
+  async loadSurvey(id: string | null): Promise<Survey | undefined> {
+    if (!id) {
+      return undefined;
+    }
+
+    const cachedSurvey = this.getSurveyById(id);
+
+    if (cachedSurvey) {
+      return cachedSurvey;
+    }
+
+    const survey = await this.execute('Unable to load this survey.', () =>
+      this.repository.getSurveyById(id),
+    );
+
+    if (survey) {
+      this.upsertSurvey(survey);
+    }
+
+    return survey;
+  }
 
   getSurveyById(id: string | null): Survey | undefined {
     return id ? this.surveysState().find((survey) => survey.id === id) : undefined;
   }
 
   async createSurvey(input: CreateSurveyInput): Promise<Survey> {
-    const survey: Survey = {
-      id: nextTemporaryId('survey'),
-      category: input.category,
-      title: input.title,
-      description: input.description,
-      endDate: input.endDate,
-      daysRemaining: calculateDaysRemaining(input.endDate),
-      status: 'active',
-      questions: input.questions.map((question) => ({
-        id: nextTemporaryId('question'),
-        prompt: question.prompt,
-        allowMultiple: question.allowMultiple,
-        answers: question.answers.map((answer) => ({
-          id: nextTemporaryId('answer'),
-          text: answer,
-          voteCount: 0,
-        })),
-      })),
-    };
+    const survey = await this.execute('Unable to create the survey.', () =>
+      this.repository.createSurvey(input),
+    );
 
-    this.surveysState.update((surveys) => [...surveys, survey]);
+    this.upsertSurvey(survey);
 
     return survey;
   }
 
-  submitVote(surveyId: string, selections: readonly SurveyVoteSelection[]): boolean {
-    const survey = this.getSurveyById(surveyId);
+  async submitVote(surveyId: string, selections: readonly SurveyVoteSelection[]): Promise<boolean> {
+    const survey = await this.execute('Unable to submit your vote.', () =>
+      this.repository.submitVote(surveyId, selections),
+    );
 
-    if (!survey || survey.status !== 'active' || !isValidVote(survey, selections)) {
+    if (!survey) {
       return false;
     }
 
-    const selectedAnswers = new Map(
-      selections.map((selection) => [selection.questionId, new Set(selection.answerIds)]),
-    );
-
-    this.surveysState.update((surveys) =>
-      surveys.map((currentSurvey) => {
-        if (currentSurvey.id !== surveyId) {
-          return currentSurvey;
-        }
-
-        return {
-          ...currentSurvey,
-          questions: currentSurvey.questions.map((question) => ({
-            ...question,
-            answers: question.answers.map((answer) => ({
-              ...answer,
-              voteCount:
-                answer.voteCount + (selectedAnswers.get(question.id)?.has(answer.id) ? 1 : 0),
-            })),
-          })),
-        };
-      }),
-    );
+    this.upsertSurvey(survey);
 
     return true;
   }
-}
 
-function isValidVote(survey: Survey, selections: readonly SurveyVoteSelection[]): boolean {
-  if (selections.length !== survey.questions.length) {
-    return false;
+  clearError(): void {
+    this.errorState.set(null);
   }
 
-  const selectionsByQuestion = new Map(
-    selections.map((selection) => [selection.questionId, selection.answerIds]),
-  );
+  private upsertSurvey(survey: Survey): void {
+    this.surveysState.update((surveys) => {
+      const surveyExists = surveys.some((currentSurvey) => currentSurvey.id === survey.id);
 
-  if (selectionsByQuestion.size !== selections.length) {
-    return false;
+      return surveyExists
+        ? surveys.map((currentSurvey) => (currentSurvey.id === survey.id ? survey : currentSurvey))
+        : [...surveys, survey];
+    });
   }
 
-  return survey.questions.every((question) => {
-    const answerIds = selectionsByQuestion.get(question.id);
+  private async execute<T>(message: string, operation: () => Promise<T>): Promise<T> {
+    this.pendingRequests.update((pendingRequests) => pendingRequests + 1);
+    this.errorState.set(null);
 
-    if (
-      !answerIds ||
-      answerIds.length === 0 ||
-      (!question.allowMultiple && answerIds.length !== 1)
-    ) {
-      return false;
+    try {
+      return await operation();
+    } catch (error) {
+      this.errorState.set(message);
+      throw error;
+    } finally {
+      this.pendingRequests.update((pendingRequests) => pendingRequests - 1);
     }
-
-    const uniqueAnswerIds = new Set(answerIds);
-    const validAnswerIds = new Set(question.answers.map((answer) => answer.id));
-
-    return (
-      uniqueAnswerIds.size === answerIds.length &&
-      answerIds.every((answerId) => validAnswerIds.has(answerId))
-    );
-  });
-}
-
-function nextTemporaryId(prefix: string): string {
-  const id = temporaryId;
-  temporaryId += 1;
-
-  return `${prefix}-${id}`;
-}
-
-function calculateDaysRemaining(endDate: string | null): number | null {
-  if (!endDate) {
-    return null;
   }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const deadline = new Date(`${endDate}T00:00:00`);
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-
-  return Math.max(0, Math.ceil((deadline.getTime() - today.getTime()) / millisecondsPerDay));
 }

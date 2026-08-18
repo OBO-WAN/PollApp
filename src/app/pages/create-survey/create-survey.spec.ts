@@ -1,6 +1,7 @@
 import { provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
 import { CreateSurvey } from './create-survey';
 
@@ -11,11 +12,12 @@ describe('CreateSurvey', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CreateSurvey],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideInMemorySurveyRepository()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CreateSurvey);
     store = TestBed.inject(SurveyStore);
+    await store.loadSurveys();
+    fixture = TestBed.createComponent(CreateSurvey);
     fixture.detectChanges();
   });
 
