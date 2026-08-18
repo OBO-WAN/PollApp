@@ -33,6 +33,7 @@ export class SurveyDetail {
   private readonly selectedAnswersState = signal<Readonly<Record<string, readonly string[]>>>({});
   private readonly submittedSurveyId = signal<string | null>(null);
 
+  protected readonly resultsExpanded = signal(true);
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
   protected readonly isReadOnly = computed(() => this.survey()?.status === 'past');
   protected readonly canSubmit = computed(() => {
@@ -107,6 +108,10 @@ export class SurveyDetail {
     if (this.surveyStore.submitVote(survey.id, selections)) {
       this.submittedSurveyId.set(survey.id);
     }
+  }
+
+  protected toggleResults(): void {
+    this.resultsExpanded.update((isExpanded) => !isExpanded);
   }
 
   protected resultLabel(

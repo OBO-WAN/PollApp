@@ -89,6 +89,25 @@ describe('SurveyDetail', () => {
     expect(completeButton.disabled).toBe(true);
   });
 
+  it('toggles the responsive results panel accessibly', async () => {
+    const harness = await RouterTestingHarness.create();
+
+    await harness.navigateByUrl('/surveys/1', SurveyDetail);
+
+    const page = harness.routeNativeElement as HTMLElement;
+    const toggle = page.querySelector('.results-toggle') as HTMLButtonElement;
+    const panel = page.querySelector('#survey-results-panel') as HTMLElement;
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(panel.classList.contains('results-panel--expanded')).toBe(true);
+
+    toggle.click();
+    harness.detectChanges();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.classList.contains('results-panel--expanded')).toBe(false);
+  });
+
   const additionalSurveyCases = [
     {
       id: '2',
