@@ -25,49 +25,187 @@
 
 @media (max-width: 650px) {
   .create-survey-page {
-    padding: 16px 0;
-    background-color: var(--color-primary-purple);
+    padding: 48px 0 57px;
+    background-color: #fefdff;
+  }
+
+  .create-page-header {
+    display: flex;
+    width: calc(100% - 32px);
+    height: 49px;
+    margin: 0 auto 54px;
+    align-items: flex-start;
   }
 
   .survey-editor {
     width: 100%;
-    padding: 24px 16px;
-    border-radius: 0 50px 0 0;
+    min-height: 1258px;
+    padding: 40px 0;
+    border-radius: 5px 100px 5px 5px;
   }
 
   .editor-header {
+    width: min(325px, calc(100% - 50px));
     align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 0;
+    margin: 0 auto 32px;
+  }
+
+  .editor-header > div {
+    width: calc(100% - 39px);
+    min-width: 0;
   }
 
   .editor-header h1 {
-    margin-top: 4px;
-    font-size: 42px;
-    line-height: 46px;
+    width: min(294px, calc(100vw - 32px));
+    margin-top: 16px;
+    font-size: 56px;
+    line-height: 42px;
+  }
+
+  .draft-badge {
+    min-height: 26px;
   }
 
   .cancel-button {
-    margin-top: 6px;
+    width: 39px;
+    min-height: 32px;
+    margin-top: 0;
+    padding: 4px 7px;
+  }
+
+  .cancel-button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .cancel-button img {
+    display: block;
+    filter: brightness(0) invert(1);
   }
 
   .form-panel {
-    padding: 28px 16px;
-    border-radius: 5px 44px 5px 5px;
+    width: min(340px, calc(100% - 24px));
+    padding: 40px 10px;
+    margin-inline: auto;
+    border-radius: 5px 80px 5px 5px;
+  }
+
+  .field-with-action {
+    position: relative;
+    display: block;
+  }
+
+  .field-with-action > .icon-button {
+    position: absolute;
+    top: -30px;
+    right: 16px;
+  }
+
+  .required-label {
+    display: none;
+  }
+
+  .survey-details {
+    gap: 24px;
   }
 
   .compact-fields {
     grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .category-field {
+    width: 206px;
+    order: -1;
+  }
+
+  .category-field > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .category-field .select-field select {
+    min-height: 32px;
+    padding: 4px 34px 4px 0;
+    color: #fefdff;
+    background-color: transparent;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .category-field .select-field select option {
+    color: var(--color-primary-purple);
+    background-color: #fefdff;
+  }
+
+  .category-field .select-field > img {
+    top: 4px;
+    right: 6px;
+  }
+
+  .question-builder {
+    gap: 64px;
+    margin-top: 48px;
+  }
+
+  .questions {
+    gap: 40px;
   }
 
   .answer-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .answer-row {
+    grid-template-columns: minmax(0, 1fr) 26px;
+    row-gap: 4px;
+  }
+
+  .answer-row > label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .answer-row > input {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .answer-row > .icon-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .answer-error {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .text-action {
+    margin-left: 8px;
+  }
+
+  .secondary-action {
+    justify-self: center;
+    margin-top: 24px;
   }
 
   .editor-actions {
-    margin-top: 24px;
+    justify-content: center;
+    margin-top: 48px;
   }
 
   .published-notice {
@@ -79,24 +217,7 @@
 }
 
 @media (max-width: 420px) {
-  .editor-header {
-    flex-direction: column;
-  }
-
-  .cancel-button {
-    align-self: flex-end;
-    margin-top: 0;
-  }
-
-  .form-panel {
-    padding-inline: 12px;
-  }
-
-  .answer-row {
-    grid-template-columns: 20px minmax(0, 1fr) 26px;
-  }
-
-  .text-action {
-    margin-left: 24px;
+  .multiple-answer-option {
+    font-size: 10px;
   }
 }
