@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 
+import { provideInMemorySurveyRepository } from './in-memory-survey.repository';
 import { SurveyStore } from './survey-store';
+import { SURVEY_REPOSITORY, SurveyRepository } from './survey.repository';
 
 describe('SurveyStore', () => {
   let store: SurveyStore;
+  let repository: SurveyRepository;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
+  beforeEach(async () => {
+    TestBed.configureTestingModule({ providers: [provideInMemorySurveyRepository()] });
     store = TestBed.inject(SurveyStore);
+    repository = TestBed.inject(SURVEY_REPOSITORY);
+    await store.loadSurveys();
   });
 
   it('adds a created survey to the shared in-memory collection', async () => {
@@ -49,7 +54,7 @@ describe('SurveyStore', () => {
     expect(store.getSurveyById(null)).toBeUndefined();
   });
 
-  it('records a valid vote in memory without mutating unrelated answers', () => {
+  it('records a valid vote in memory without mutating unrelated answers', async () => {
     const survey = store.getSurveyById('1');
     const selections =
       survey?.questions.map((question) => ({
@@ -57,7 +62,7 @@ describe('SurveyStore', () => {
         answerIds: [question.answers[0].id],
       })) ?? [];
 
-    expect(store.submitVote('1', selections)).toBe(true);
+    await expect(store.submitVote('1', selections)).resolves.toBe(true);
 
     const updatedSurvey = store.getSurveyById('1');
     expect(updatedSurvey?.questions[0].answers[0].voteCount).toBe(28);
@@ -65,12 +70,12 @@ describe('SurveyStore', () => {
     expect(store.getSurveyById('2')?.questions[0].answers[0].voteCount).toBe(32);
   });
 
-  it('rejects incomplete or invalid vote selections', () => {
+  it('rejects incomplete or invalid vote selections', async () => {
     const survey = store.getSurveyById('1');
     const initialVoteCount = survey?.questions[0].answers[0].voteCount;
 
-    expect(store.submitVote('1', [])).toBe(false);
-    expect(
+    await expect(store.submitVote('1', [])).resolves.toBe(false);
+    await expect(
       store.submitVote(
         '1',
         survey?.questions.map((question) => ({
@@ -78,11 +83,11 @@ describe('SurveyStore', () => {
           answerIds: ['unknown-answer'],
         })) ?? [],
       ),
-    ).toBe(false);
+    ).resolves.toBe(false);
     expect(store.getSurveyById('1')?.questions[0].answers[0].voteCount).toBe(initialVoteCount);
   });
 
-  it('rejects votes for a past survey without changing its final results', () => {
+  it('rejects votes for a past survey without changing its final results', async () => {
     const survey = store.getSurveyById('7');
     const selections =
       survey?.questions.map((question) => ({
@@ -91,7 +96,7 @@ describe('SurveyStore', () => {
       })) ?? [];
     const initialVoteCount = survey?.questions[0].answers[0].voteCount;
 
-    expect(store.submitVote('7', selections)).toBe(false);
+    await expect(store.submitVote('7', selections)).resolves.toBe(false);
     expect(store.getSurveyById('7')?.questions[0].answers[0].voteCount).toBe(initialVoteCount);
   });
 
@@ -147,6 +152,35 @@ describe('SurveyStore', () => {
     expect(pastSurveys.every((survey) => survey?.status === 'past')).toBe(true);
     expect(pastSurveys.every((survey) => survey?.description !== '')).toBe(true);
     expect(pastSurveys.every((survey) => survey?.questions.length === 2)).toBe(true);
+  });
+
+  it('exposes repository loading and error state', async () => {
+    const currentSurveys = store.surveys();
+    let finishLoading: ((surveys: readonly (typeof currentSurveys)[number][]) => void) | undefined;
+    const pendingSurveys = new Promise<readonly (typeof currentSurveys)[number][]>((resolve) => {
+      finishLoading = resolve;
+    });
+
+    vi.spyOn(repository, 'listSurveys').mockReturnValueOnce(pendingSurveys);
+
+    const loading = store.loadSurveys();
+
+    expect(store.isLoading()).toBe(true);
+    expect(store.error()).toBeNull();
+
+    finishLoading?.(currentSurveys);
+    await loading;
+
+    expect(store.isLoading()).toBe(false);
+
+    vi.spyOn(repository, 'listSurveys').mockRejectedValueOnce(new Error('Network unavailable'));
+
+    await expect(store.loadSurveys()).rejects.toThrow('Network unavailable');
+    expect(store.isLoading()).toBe(false);
+    expect(store.error()).toBe('Unable to load surveys.');
+
+    store.clearError();
+    expect(store.error()).toBeNull();
   });
 });
 

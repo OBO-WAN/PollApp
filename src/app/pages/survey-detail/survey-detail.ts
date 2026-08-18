@@ -91,7 +91,7 @@ export class SurveyDetail {
     });
   }
 
-  protected submitVote(event: Event): void {
+  protected async submitVote(event: Event): Promise<void> {
     event.preventDefault();
 
     const survey = this.survey();
@@ -105,7 +105,7 @@ export class SurveyDetail {
       answerIds: this.selectedAnswersState()[question.id] ?? [],
     }));
 
-    if (this.surveyStore.submitVote(survey.id, selections)) {
+    if (await this.surveyStore.submitVote(survey.id, selections)) {
       this.submittedSurveyId.set(survey.id);
     }
   }

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
 import { SurveyDetail } from './survey-detail';
 
@@ -16,8 +17,11 @@ describe('SurveyDetail', () => {
             component: SurveyDetail,
           },
         ]),
+        provideInMemorySurveyRepository(),
       ],
     }).compileComponents();
+
+    await TestBed.inject(SurveyStore).loadSurveys();
   });
 
   it('renders the selected survey as an accessible voting form', async () => {
@@ -72,6 +76,7 @@ describe('SurveyDetail', () => {
     expect(completeButton.disabled).toBe(false);
 
     completeButton.click();
+    await harness.fixture.whenStable();
     harness.detectChanges();
 
     const updatedSurvey = store.getSurveyById('1');
