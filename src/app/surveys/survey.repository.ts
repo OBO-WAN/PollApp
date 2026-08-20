@@ -2,9 +2,12 @@ import { InjectionToken } from '@angular/core';
 
 import { CreateSurveyInput, Survey, SurveyVoteSelection } from './survey.model';
 
-export interface SurveyRepository {
+export interface SurveyReader {
   listSurveys(): Promise<readonly Survey[]>;
   getSurveyById(id: string): Promise<Survey | undefined>;
+}
+
+export interface SurveyRepository extends SurveyReader {
   createSurvey(input: CreateSurveyInput): Promise<Survey>;
   submitVote(
     surveyId: string,

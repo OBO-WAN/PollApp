@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --o",
+    "start": "npm run supabase:config && ng serve --o",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "playwright test",
+    "test:e2e:supabase": "playwright test --config=playwright.supabase.config.ts",
+    "supabase:config": "node scripts/write-supabase-config.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
@@ -23,6 +25,7 @@
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@supabase/supabase-js": "^2.112.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

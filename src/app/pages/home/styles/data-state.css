@@ -1,0 +1,23 @@
+.survey-data-state {
+  width: min(720px, 100%);
+  padding: 12px 16px;
+  margin: -32px auto 0;
+  border: 2px solid rgb(255 255 255 / 45%);
+  border-radius: 10px;
+  color: white;
+  background-color: rgb(255 255 255 / 8%);
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.survey-data-state--warning {
+  border-color: var(--color-secondary-orange);
+  color: var(--color-primary-purple);
+  background-color: var(--color-secondary-orange);
+}
+
+.survey-data-state--error {
+  border-color: #ffd5d5;
+  background-color: #6f2832;
+}

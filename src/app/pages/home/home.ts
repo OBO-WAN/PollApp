@@ -12,6 +12,7 @@ import { SurveyStore } from '../../surveys/survey-store';
     './home.css',
     './styles/surveys.css',
     './styles/dropdown.css',
+    './styles/data-state.css',
     './styles/motion.css',
     './styles/button.css',
     './styles/responsive.css',
@@ -22,6 +23,11 @@ export class Home {
   private readonly router = inject(Router);
   private readonly surveyStore = inject(SurveyStore);
   private readonly surveys = this.surveyStore.surveys;
+
+  protected readonly isLoading = this.surveyStore.isLoading;
+  protected readonly loadError = this.surveyStore.error;
+  protected readonly dataSource = this.surveyStore.dataSource;
+  protected readonly dataWarning = this.surveyStore.dataWarning;
 
   protected readonly endingSoonSurveys = computed(() =>
     [...this.surveys()]
