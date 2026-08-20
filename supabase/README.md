@@ -4,14 +4,14 @@ This directory contains the database contract for PollApp. The Angular applicati
 
 ## Data model
 
-| Relation | Purpose | Anonymous access |
-| --- | --- | --- |
-| `surveys` | Survey metadata and lifecycle | Read |
-| `questions` | Ordered survey questions | Read |
-| `answers` | Ordered answer choices | Read |
-| `votes` | One anonymous ballot per survey and browser token | None |
-| `vote_selections` | Answers selected on a ballot | None |
-| `answer_results` | Public aggregate count per answer | Read + realtime |
+| Relation          | Purpose                                           | Anonymous access |
+| ----------------- | ------------------------------------------------- | ---------------- |
+| `surveys`         | Survey metadata and lifecycle                     | Read             |
+| `questions`       | Ordered survey questions                          | Read             |
+| `answers`         | Ordered answer choices                            | Read             |
+| `votes`           | One anonymous ballot per survey and browser token | None             |
+| `vote_selections` | Answers selected on a ballot                      | None             |
+| `answer_results`  | Public aggregate count per answer                 | Read + realtime  |
 
 Direct writes are not granted to `anon` or `authenticated`. The security-definer functions validate input and perform each multi-table write in one transaction:
 
@@ -30,14 +30,22 @@ The anonymous token is a client-generated UUID used for best-effort duplicate pr
 
 ## Local verification
 
-After installing the Supabase CLI and generating the local CLI configuration with `supabase init`, run:
+The repository pins the Supabase CLI as a development dependency and includes `config.toml`. Docker must be installed and running before starting the local stack.
+
+Install dependencies, then execute the complete database check:
 
 ```bash
-supabase start
-supabase db reset
+npm install
+npm run supabase:verify
 ```
 
-`db reset` recreates the local database, applies the migrations in order, and then runs `seed.sql`.
+The verification command starts Supabase, recreates the local database, applies every migration, loads `seed.sql`, and runs the pgTAP tests under `supabase/tests/`.
+
+To stop the local services without deleting their data:
+
+```bash
+npm run supabase:stop
+```
 
 Useful checks:
 
@@ -51,16 +59,21 @@ select count(*) as selections from public.vote_selections;
 
 The seeded baseline is 9 surveys, 18 questions, 71 answers, and 600 anonymous ballots. Selection totals vary because multi-choice questions may contain more than one answer.
 
+The database tests additionally verify RLS privileges, realtime publication, transactional survey creation, vote submission, aggregate updates, duplicate-vote prevention, single-choice validation, and closed-survey behavior.
+
 ## Remote project
 
-Linking and pushing should be done only after choosing the target Supabase project:
+Linking and pushing should be done only after choosing the target Supabase project. Run the dry-run first and inspect its migration list:
 
 ```bash
-supabase link --project-ref <project-ref>
-supabase db push
+npx supabase login
+npx supabase link --project-ref <project-ref>
+npx supabase db push --dry-run --include-seed
+npx supabase db push --include-seed
+npx supabase test db --linked
 ```
 
-Do not commit database passwords, service-role keys, access tokens, or generated files from `supabase/.temp/`.
+The linked-project test expects the fixture seed baseline and is intended for the initial deployment before real users vote. Do not commit database passwords, secret or service-role keys, access tokens, `.env` files, or generated files from `supabase/.temp/`.
 
 ## RPC payloads
 

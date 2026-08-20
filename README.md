@@ -65,6 +65,14 @@ The initial database contract lives in [`supabase/`](supabase/README.md). It inc
 
 Authentication and the Angular Supabase adapter are intentionally outside this schema-only change.
 
+To start a clean local database, apply the migrations and seed, and run the database tests:
+
+```bash
+npm run supabase:verify
+```
+
+Docker must be installed and running. See [`supabase/README.md`](supabase/README.md) for local and hosted-project setup.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
