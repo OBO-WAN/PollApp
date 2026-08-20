@@ -160,13 +160,14 @@ with answer_windows as (
 )
 insert into public.vote_selections (vote_id, survey_id, question_id, answer_id)
 select
-  window.survey_id || '-seed-vote-' || voter.voter_number,
-  window.survey_id,
-  window.question_id,
-  window.answer_id
-from answer_windows as window
+  answer_window.survey_id || '-seed-vote-' || voter.voter_number,
+  answer_window.survey_id,
+  answer_window.question_id,
+  answer_window.answer_id
+from answer_windows as answer_window
 cross join generate_series(1, 100) as voter (voter_number)
-where mod(voter.voter_number - 1 - window.vote_offset + 200, 100) < window.vote_count
+where mod(voter.voter_number - 1 - answer_window.vote_offset + 200, 100)
+  < answer_window.vote_count
 on conflict (vote_id, answer_id) do nothing;
 
 commit;
