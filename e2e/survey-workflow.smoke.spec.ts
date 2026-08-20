@@ -6,6 +6,13 @@ const workflowViewports = [
 ] as const;
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/supabase-config.json', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{}',
+    }),
+  );
   await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, (route) => route.abort());
 });
 
@@ -108,7 +115,7 @@ async function voteAndVerifyResults(page: Page, surveyTitle: string): Promise<vo
   await expect(page.locator('#vote-status')).toContainText('Your vote has been recorded');
   await expect(resultItems.nth(0).locator('.result-value')).toHaveText(['100%', '0%']);
   await expect(resultItems.nth(1).locator('.result-value')).toHaveText(['50%', '0%', '50%']);
-  await expect(page.locator('.answer-option input')).toBeDisabled();
+  await expect(page.locator('.answer-option input:enabled')).toHaveCount(0);
   await expect(completeButton).toBeDisabled();
 
   await page

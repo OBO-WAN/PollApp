@@ -8,6 +8,8 @@ test('matches the 375px Home composition without page overflow', async ({ page }
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
 
+  await expect(page.locator('.highlight-card').first()).toBeVisible();
+
   const layout = await page.evaluate(() => {
     const bounds = (selector: string) => {
       const element = document.querySelector<HTMLElement>(selector);

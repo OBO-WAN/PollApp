@@ -49,6 +49,7 @@ export class CreateSurvey {
   protected readonly categories = SURVEY_CATEGORIES;
   protected readonly isPublishing = signal(false);
   protected readonly published = signal(false);
+  protected readonly publishError = this.surveyStore.error;
   protected readonly submitted = signal(false);
   protected readonly minimumEndDate = formatLocalDate(new Date());
 
@@ -112,17 +113,20 @@ export class CreateSurvey {
     this.surveyForm.markAllAsTouched();
 
     if (this.surveyForm.invalid) {
-      queueMicrotask(() => {
+      setTimeout(() => {
         this.host.nativeElement.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-      });
+      }, 0);
       return;
     }
 
+    this.surveyStore.clearError();
     this.isPublishing.set(true);
 
     try {
       await this.surveyStore.createSurvey(this.createSurveyInput());
       this.published.set(true);
+    } catch {
+      // SurveyStore owns the user-facing publishing error.
     } finally {
       this.isPublishing.set(false);
     }

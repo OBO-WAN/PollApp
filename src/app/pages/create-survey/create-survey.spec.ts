@@ -2,11 +2,13 @@ import { provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
+import { SURVEY_REPOSITORY, SurveyRepository } from '../../surveys/survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
 import { CreateSurvey } from './create-survey';
 
 describe('CreateSurvey', () => {
   let fixture: ComponentFixture<CreateSurvey>;
+  let repository: SurveyRepository;
   let store: SurveyStore;
 
   beforeEach(async () => {
@@ -15,6 +17,7 @@ describe('CreateSurvey', () => {
       providers: [provideRouter([]), provideInMemorySurveyRepository()],
     }).compileComponents();
 
+    repository = TestBed.inject(SURVEY_REPOSITORY);
     store = TestBed.inject(SurveyStore);
     await store.loadSurveys();
     fixture = TestBed.createComponent(CreateSurvey);
@@ -53,6 +56,25 @@ describe('CreateSurvey', () => {
     expect(fixture.nativeElement.querySelector('.published-notice')?.textContent).toContain(
       'Your survey is now published',
     );
+  });
+
+  it('shows an accessible error when publishing fails', async () => {
+    vi.spyOn(repository, 'createSurvey').mockRejectedValueOnce(new Error('offline'));
+
+    setField('#survey-title', 'Team lunch');
+    setField('#question-0', 'Where should we eat?');
+    setField('#answer-0-0', 'Cafe');
+    setField('#answer-0-1', 'Park');
+    setField('#survey-category', 'Team activities', 'change');
+
+    submitForm();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Unable to create the survey.',
+    );
+    expect(fixture.nativeElement.querySelector('.published-notice')).toBeNull();
   });
 
   it('rejects an end date in the past', async () => {

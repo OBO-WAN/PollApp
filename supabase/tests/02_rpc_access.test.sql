@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = extensions, public;
 
-select plan(17);
+select plan(21);
 
 select ok(
   has_table_privilege('anon', 'public.surveys', 'SELECT'),
@@ -74,6 +74,49 @@ select lives_ok(
 );
 
 reset role;
+
+select results_eq(
+  $$
+    select count(*)
+    from public.surveys
+    where title = 'Database RPC smoke test'
+  $$,
+  array[1::bigint],
+  'survey creation stores the survey'
+);
+select results_eq(
+  $$
+    select count(*)
+    from public.questions q
+    join public.surveys s on s.id = q.survey_id
+    where s.title = 'Database RPC smoke test'
+  $$,
+  array[1::bigint],
+  'survey creation stores every question'
+);
+select results_eq(
+  $$
+    select count(*)
+    from public.answers a
+    join public.questions q on q.id = a.question_id
+    join public.surveys s on s.id = q.survey_id
+    where s.title = 'Database RPC smoke test'
+  $$,
+  array[2::bigint],
+  'survey creation stores every answer'
+);
+select results_eq(
+  $$
+    select count(*)
+    from public.answer_results ar
+    join public.answers a on a.id = ar.answer_id
+    join public.questions q on q.id = a.question_id
+    join public.surveys s on s.id = q.survey_id
+    where s.title = 'Database RPC smoke test'
+  $$,
+  array[2::bigint],
+  'survey creation initializes every answer result'
+);
 
 select results_eq(
   $$

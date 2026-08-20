@@ -39,7 +39,7 @@ export class FallbackSurveyRepository implements SurveyRepository {
   }
 
   createSurvey(input: CreateSurveyInput): Promise<Survey> {
-    return this.fallback.createSurvey(input);
+    return this.primary.createSurvey(input);
   }
 
   submitVote(

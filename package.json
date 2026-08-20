@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "playwright test",
-    "test:e2e:supabase": "playwright test --config=playwright.supabase.config.ts",
+    "test:e2e:supabase": "supabase start && supabase db reset && playwright test --config=playwright.supabase.config.ts",
     "supabase:config": "node scripts/write-supabase-config.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
