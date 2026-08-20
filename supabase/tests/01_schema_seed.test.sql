@@ -118,14 +118,17 @@ select results_eq(
 select results_eq(
   $$
     select count(*)
-    from public.votes as vote
-    join public.questions as question using (survey_id)
-    left join public.vote_selections as selection
-      on selection.vote_id = vote.id
-      and selection.question_id = question.id
-    group by vote.id, question.id, question.allow_multiple
-    having count(selection.answer_id) = 0
-      or (not question.allow_multiple and count(selection.answer_id) <> 1)
+    from (
+      select 1
+      from public.votes as vote
+      join public.questions as question using (survey_id)
+      left join public.vote_selections as selection
+        on selection.vote_id = vote.id
+        and selection.question_id = question.id
+      group by vote.id, question.id, question.allow_multiple
+      having count(selection.answer_id) = 0
+        or (not question.allow_multiple and count(selection.answer_id) <> 1)
+    ) as invalid_ballot_answer
   $$,
   array[0::bigint],
   'every seeded ballot answers each question correctly'
