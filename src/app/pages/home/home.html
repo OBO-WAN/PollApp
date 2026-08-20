@@ -1,4 +1,4 @@
-<div class="home-page">
+<div class="home-page" [attr.data-survey-source]="dataSource()">
   <header class="site-header">
     <a class="logo" href="./" aria-label="Poll App home">
       <span class="logo__mark" aria-hidden="true">
@@ -69,6 +69,18 @@
     </section>
     <section class="survey-highlights" aria-labelledby="surveys-title">
       <h2 id="surveys-title">Your surveys</h2>
+
+      @if (isLoading()) {
+        <p class="survey-data-state" role="status">Loading surveys…</p>
+      } @else if (loadError()) {
+        <p class="survey-data-state survey-data-state--error" role="alert">
+          {{ loadError() }}
+        </p>
+      } @else if (dataWarning()) {
+        <p class="survey-data-state survey-data-state--warning" role="alert">
+          {{ dataWarning() }}
+        </p>
+      }
 
       <div class="ending-soon">
         <h3>Ending soon surveys</h3>
@@ -189,7 +201,9 @@
             </p>
           </a>
         } @empty {
-          <p class="survey-list__empty">No surveys match this filter yet.</p>
+          @if (!isLoading()) {
+            <p class="survey-list__empty">No surveys match this filter yet.</p>
+          }
         }
       </div>
     </section>

@@ -4,13 +4,17 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+Start the local Supabase stack and apply its seed data:
 
 ```bash
-ng serve
+npm run supabase:start
+npm run supabase:reset
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+`npm start` writes a browser-safe runtime configuration from `supabase status -o env`, then
+starts Angular. Open `http://localhost:4200/`. If Supabase becomes unavailable, the application
+keeps working with fixture surveys and displays a fallback notice.
 
 ## Code scaffolding
 
@@ -56,14 +60,15 @@ The Playwright suite covers the main survey workflows and responsive viewports.
 
 ## Supabase database
 
-The initial database contract lives in [`supabase/`](supabase/README.md). It includes:
+The database contract lives in [`supabase/`](supabase/README.md). It includes:
 
 - relational survey, question, answer, vote, and result tables;
 - transactional functions for creating surveys and submitting votes;
 - anonymous read policies with writes restricted to those functions;
 - seed data matching the current Angular survey fixtures.
 
-Authentication and the Angular Supabase adapter are intentionally outside this schema-only change.
+Angular reads surveys from the local Data API through `@supabase/supabase-js`. Survey creation and
+voting remain in memory until their write integration is implemented separately.
 
 To start a clean local database, apply the migrations and seed, and run the database tests:
 
@@ -72,6 +77,12 @@ npm run supabase:verify
 ```
 
 Docker must be installed and running. See [`supabase/README.md`](supabase/README.md) for local and hosted-project setup.
+
+Run the focused browser integration after the local stack has started:
+
+```bash
+npm run test:e2e:supabase
+```
 
 ## Additional Resources
 

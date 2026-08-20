@@ -1,11 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { CreateSurveyInput, Survey, SurveyVoteSelection } from './survey.model';
+import { SurveyDataStatus } from './survey-data-status';
 import { SURVEY_REPOSITORY } from './survey.repository';
 
 @Injectable({ providedIn: 'root' })
 export class SurveyStore {
   private readonly repository = inject(SURVEY_REPOSITORY);
+  private readonly dataStatus = inject(SurveyDataStatus);
   private readonly surveysState = signal<readonly Survey[]>([]);
   private readonly pendingRequests = signal(0);
   private readonly errorState = signal<string | null>(null);
@@ -13,6 +15,8 @@ export class SurveyStore {
   readonly surveys = this.surveysState.asReadonly();
   readonly isLoading = computed(() => this.pendingRequests() > 0);
   readonly error = this.errorState.asReadonly();
+  readonly dataSource = this.dataStatus.source;
+  readonly dataWarning = this.dataStatus.warning;
 
   async loadSurveys(): Promise<void> {
     const surveys = await this.execute('Unable to load surveys.', () =>

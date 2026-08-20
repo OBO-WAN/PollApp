@@ -41,6 +41,7 @@ yarn-error.log
 /test-results/
 /supabase/.temp/
 /supabase/.branches/
+/public/supabase-config.json
 /libpeerconnection.log
 testem.log
 /typings

@@ -7,18 +7,16 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideInMemorySurveyRepository } from './surveys/in-memory-survey.repository';
 import { SurveyStore } from './surveys/survey-store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideInMemorySurveyRepository(),
-    provideAppInitializer(() =>
-      inject(SurveyStore)
+    provideAppInitializer(() => {
+      void inject(SurveyStore)
         .loadSurveys()
-        .catch(() => undefined),
-    ),
+        .catch(() => undefined);
+    }),
   ],
 };

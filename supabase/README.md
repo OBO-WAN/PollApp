@@ -1,6 +1,8 @@
 # PollApp Supabase database
 
-This directory contains the database contract for PollApp. The Angular application is not connected to it yet; that adapter belongs in a separate integration change.
+This directory contains the database contract for PollApp. Angular reads survey data from the local
+Data API and falls back to fixtures when the API cannot be reached. Survey creation and voting still
+use the in-memory repository during this read-only integration stage.
 
 ## Data model
 
@@ -45,6 +47,21 @@ To stop the local services without deleting their data:
 
 ```bash
 npm run supabase:stop
+```
+
+To run Angular against the local database, keep Supabase running and start the application:
+
+```bash
+npm run supabase:reset
+npm start
+```
+
+`npm start` generates the ignored `public/supabase-config.json` file from the CLI status. It contains
+only the local API URL and browser-safe publishable or legacy anon key. Run the focused Playwright
+integration with:
+
+```bash
+npm run test:e2e:supabase
 ```
 
 Useful checks:

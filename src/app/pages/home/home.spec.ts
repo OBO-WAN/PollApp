@@ -2,12 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
+import { SurveyDataStatus } from '../../surveys/survey-data-status';
+import { SURVEY_REPOSITORY, SurveyRepository } from '../../surveys/survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
 import { Home } from './home';
 
 describe('Home', () => {
   let fixture: ComponentFixture<Home>;
   let router: Router;
+  let repository: SurveyRepository;
+  let store: SurveyStore;
+  let dataStatus: SurveyDataStatus;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -15,7 +20,10 @@ describe('Home', () => {
       providers: [provideRouter([]), provideInMemorySurveyRepository()],
     }).compileComponents();
 
-    await TestBed.inject(SurveyStore).loadSurveys();
+    store = TestBed.inject(SurveyStore);
+    repository = TestBed.inject(SURVEY_REPOSITORY);
+    dataStatus = TestBed.inject(SurveyDataStatus);
+    await store.loadSurveys();
     fixture = TestBed.createComponent(Home);
     router = TestBed.inject(Router);
     fixture.detectChanges();
@@ -111,5 +119,60 @@ describe('Home', () => {
 
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     expect(page.querySelector('.category-filter__menu')).toBeNull();
+  });
+
+  it('announces loading without briefly showing the empty result', async () => {
+    const currentSurveys = store.surveys();
+    let finishLoading: ((surveys: readonly (typeof currentSurveys)[number][]) => void) | undefined;
+    const pendingSurveys = new Promise<readonly (typeof currentSurveys)[number][]>((resolve) => {
+      finishLoading = resolve;
+    });
+
+    vi.spyOn(repository, 'listSurveys').mockReturnValueOnce(pendingSurveys);
+
+    const loading = store.loadSurveys();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent).toContain(
+      'Loading surveys',
+    );
+    expect(fixture.nativeElement.querySelector('.survey-list__empty')).toBeNull();
+
+    finishLoading?.(currentSurveys);
+    await loading;
+  });
+
+  it('renders an empty state for a successful empty response', async () => {
+    vi.spyOn(repository, 'listSurveys').mockResolvedValueOnce([]);
+
+    await store.loadSurveys();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.survey-list__empty')?.textContent).toContain(
+      'No surveys match this filter yet',
+    );
+  });
+
+  it('announces when fixture data is being used as a fallback', () => {
+    dataStatus.markFallback();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.home-page')?.getAttribute('data-survey-source'),
+    ).toBe('fixtures');
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Showing sample surveys',
+    );
+  });
+
+  it('announces an unrecoverable repository error', async () => {
+    vi.spyOn(repository, 'listSurveys').mockRejectedValueOnce(new Error('offline'));
+
+    await expect(store.loadSurveys()).rejects.toThrow('offline');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
+      'Unable to load surveys',
+    );
   });
 });

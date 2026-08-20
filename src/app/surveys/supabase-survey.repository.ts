@@ -1,0 +1,142 @@
+import { inject, Injectable, InjectionToken } from '@angular/core';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+import { Survey, SurveyAnswer, SurveyQuestion } from './survey.model';
+import { SurveyReader } from './survey.repository';
+
+export const SUPABASE_CLIENT = new InjectionToken<SupabaseClient>('SUPABASE_CLIENT');
+
+const SURVEY_SELECT = `
+  id,
+  category,
+  title,
+  description,
+  end_date,
+  created_at,
+  questions (
+    id,
+    prompt,
+    allow_multiple,
+    position,
+    answers (
+      id,
+      text,
+      position,
+      answer_results (vote_count)
+    )
+  )
+`;
+
+interface AnswerResultRow {
+  readonly vote_count: number | string;
+}
+
+interface AnswerRow {
+  readonly id: string;
+  readonly text: string;
+  readonly position: number;
+  readonly answer_results: AnswerResultRow | readonly AnswerResultRow[] | null;
+}
+
+interface QuestionRow {
+  readonly id: string;
+  readonly prompt: string;
+  readonly allow_multiple: boolean;
+  readonly position: number;
+  readonly answers: readonly AnswerRow[] | null;
+}
+
+export interface SupabaseSurveyRow {
+  readonly id: string;
+  readonly category: string;
+  readonly title: string;
+  readonly description: string | null;
+  readonly end_date: string | null;
+  readonly created_at: string;
+  readonly questions: readonly QuestionRow[] | null;
+}
+
+@Injectable()
+export class SupabaseSurveyRepository implements SurveyReader {
+  private readonly client = inject(SUPABASE_CLIENT);
+
+  async listSurveys(): Promise<readonly Survey[]> {
+    const { data, error } = await this.client.from('surveys').select(SURVEY_SELECT);
+
+    if (error) {
+      throw new Error('Supabase could not load surveys.', { cause: error });
+    }
+
+    return mapSupabaseSurveys((data ?? []) as unknown as readonly SupabaseSurveyRow[]);
+  }
+
+  async getSurveyById(id: string): Promise<Survey | undefined> {
+    const { data, error } = await this.client
+      .from('surveys')
+      .select(SURVEY_SELECT)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error('Supabase could not load the survey.', { cause: error });
+    }
+
+    return data ? mapSupabaseSurvey(data as unknown as SupabaseSurveyRow) : undefined;
+  }
+}
+
+export function mapSupabaseSurveys(rows: readonly SupabaseSurveyRow[]): readonly Survey[] {
+  return [...rows]
+    .sort(
+      (first, second) =>
+        first.created_at.localeCompare(second.created_at) || first.id.localeCompare(second.id),
+    )
+    .map(mapSupabaseSurvey);
+}
+
+export function mapSupabaseSurvey(row: SupabaseSurveyRow): Survey {
+  const daysRemaining = calculateDaysRemaining(row.end_date);
+
+  return {
+    id: row.id,
+    category: row.category,
+    title: row.title,
+    description: row.description ?? '',
+    endDate: row.end_date,
+    daysRemaining,
+    status: daysRemaining === null || daysRemaining >= 0 ? 'active' : 'past',
+    questions: [...(row.questions ?? [])].sort(byPosition).map<SurveyQuestion>((question) => ({
+      id: question.id,
+      prompt: question.prompt,
+      allowMultiple: question.allow_multiple,
+      answers: [...(question.answers ?? [])].sort(byPosition).map<SurveyAnswer>((answer) => ({
+        id: answer.id,
+        text: answer.text,
+        voteCount: readVoteCount(answer.answer_results),
+      })),
+    })),
+  };
+}
+
+function byPosition(first: { readonly position: number }, second: { readonly position: number }) {
+  return first.position - second.position;
+}
+
+function readVoteCount(results: AnswerRow['answer_results']): number {
+  const result = Array.isArray(results) ? results[0] : results;
+  return Number(result?.vote_count ?? 0);
+}
+
+function calculateDaysRemaining(endDate: string | null): number | null {
+  if (!endDate) {
+    return null;
+  }
+
+  const [year, month, day] = endDate.split('-').map(Number);
+  const today = new Date();
+  const todayTimestamp = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const deadlineTimestamp = Date.UTC(year, month - 1, day);
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
+  return Math.round((deadlineTimestamp - todayTimestamp) / millisecondsPerDay);
+}
