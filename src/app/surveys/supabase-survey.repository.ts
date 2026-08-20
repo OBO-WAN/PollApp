@@ -1,7 +1,7 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { Survey, SurveyAnswer, SurveyQuestion } from './survey.model';
+import { CreateSurveyInput, Survey, SurveyAnswer, SurveyQuestion } from './survey.model';
 import { SurveyReader } from './survey.repository';
 
 export const SUPABASE_CLIENT = new InjectionToken<SupabaseClient>('SUPABASE_CLIENT');
@@ -59,6 +59,28 @@ export interface SupabaseSurveyRow {
 @Injectable()
 export class SupabaseSurveyRepository implements SurveyReader {
   private readonly client = inject(SUPABASE_CLIENT);
+
+  async createSurvey(input: CreateSurveyInput): Promise<Survey> {
+    const { data: surveyId, error } = await this.client.rpc('create_survey', {
+      p_payload: input,
+    });
+
+    if (error) {
+      throw new Error('Supabase could not create the survey.', { cause: error });
+    }
+
+    if (typeof surveyId !== 'string' || surveyId.length === 0) {
+      throw new Error('Supabase did not return the created survey ID.');
+    }
+
+    const survey = await this.getSurveyById(surveyId);
+
+    if (!survey) {
+      throw new Error('Supabase created the survey but could not load it.');
+    }
+
+    return survey;
+  }
 
   async listSurveys(): Promise<readonly Survey[]> {
     const { data, error } = await this.client.from('surveys').select(SURVEY_SELECT);

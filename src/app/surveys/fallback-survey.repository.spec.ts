@@ -9,15 +9,18 @@ import { SupabaseSurveyRepository } from './supabase-survey.repository';
 describe('FallbackSurveyRepository', () => {
   let repository: FallbackSurveyRepository;
   let dataStatus: SurveyDataStatus;
+  let fallback: InMemorySurveyRepository;
   let primary: {
     listSurveys: ReturnType<typeof vi.fn>;
     getSurveyById: ReturnType<typeof vi.fn>;
+    createSurvey: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     primary = {
       listSurveys: vi.fn(),
       getSurveyById: vi.fn(),
+      createSurvey: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -29,6 +32,7 @@ describe('FallbackSurveyRepository', () => {
     });
 
     repository = TestBed.inject(FallbackSurveyRepository);
+    fallback = TestBed.inject(InMemorySurveyRepository);
     dataStatus = TestBed.inject(SurveyDataStatus);
   });
 
@@ -50,10 +54,10 @@ describe('FallbackSurveyRepository', () => {
     expect(dataStatus.warning()).toContain('Showing sample surveys');
   });
 
-  it('keeps writes in memory during the read-only integration', async () => {
-    const survey = await repository.createSurvey({
+  it('delegates survey creation to Supabase without using the fixture repository', async () => {
+    const input = {
       category: 'Workplace culture',
-      title: 'Local write',
+      title: 'Supabase write',
       description: '',
       endDate: null,
       questions: [
@@ -63,11 +67,46 @@ describe('FallbackSurveyRepository', () => {
           answers: ['A', 'B'],
         },
       ],
-    });
-
-    expect(survey).toMatchObject<Partial<Survey>>({
-      title: 'Local write',
+    };
+    const createdSurvey: Survey = {
+      id: 'created-survey',
+      category: input.category,
+      title: input.title,
+      description: '',
+      endDate: null,
+      daysRemaining: null,
       status: 'active',
-    });
+      questions: [],
+    };
+    const fallbackCreate = vi.spyOn(fallback, 'createSurvey');
+
+    primary.createSurvey.mockResolvedValue(createdSurvey);
+
+    await expect(repository.createSurvey(input)).resolves.toBe(createdSurvey);
+    expect(primary.createSurvey).toHaveBeenCalledWith(input);
+    expect(fallbackCreate).not.toHaveBeenCalled();
+  });
+
+  it('surfaces Supabase creation failures instead of creating a fixture-only survey', async () => {
+    const fallbackCreate = vi.spyOn(fallback, 'createSurvey');
+    primary.createSurvey.mockRejectedValue(new Error('offline'));
+
+    await expect(
+      repository.createSurvey({
+        category: 'Workplace culture',
+        title: 'Do not fake success',
+        description: '',
+        endDate: null,
+        questions: [
+          {
+            prompt: 'Choose one',
+            allowMultiple: false,
+            answers: ['A', 'B'],
+          },
+        ],
+      }),
+    ).rejects.toThrow('offline');
+
+    expect(fallbackCreate).not.toHaveBeenCalled();
   });
 });

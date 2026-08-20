@@ -252,6 +252,12 @@
         </section>
       </div>
 
+      @if (publishError()) {
+        <p class="field-error publish-error" role="alert">
+          {{ publishError() }}
+        </p>
+      }
+
       <div class="editor-actions">
         <button class="publish-button" type="submit" [disabled]="isPublishing() || published()">
           {{ isPublishing() ? 'Publishing…' : 'Publish' }}
