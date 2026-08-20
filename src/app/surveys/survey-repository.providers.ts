@@ -18,6 +18,9 @@ export function provideSurveyRepository(
   }
 
   const client = createClient(config.url, config.publishableKey, {
+    db: {
+      retry: false,
+    },
     auth: {
       autoRefreshToken: false,
       detectSessionInUrl: false,
