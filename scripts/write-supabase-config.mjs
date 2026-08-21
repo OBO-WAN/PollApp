@@ -22,6 +22,16 @@ if (!supabaseUrl || !publishableKey) {
   );
 }
 
+if (!isHttpUrl(supabaseUrl)) {
+  throw new Error('Refusing to write Supabase configuration: the URL must use HTTP or HTTPS.');
+}
+
+if (!isBrowserKey(publishableKey)) {
+  throw new Error(
+    'Refusing to write Supabase configuration: use only a browser-safe publishable or legacy anon key.',
+  );
+}
+
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(
   outputPath,
@@ -62,4 +72,32 @@ function unquote(value) {
   }
 
   return trimmedValue;
+}
+
+function isHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function isBrowserKey(value) {
+  if (value.startsWith('sb_publishable_')) {
+    return true;
+  }
+
+  const encodedPayload = value.split('.')[1];
+
+  if (!encodedPayload) {
+    return false;
+  }
+
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8'));
+    return payload.role === 'anon';
+  } catch {
+    return false;
+  }
 }

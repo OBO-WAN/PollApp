@@ -35,6 +35,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate hosted Supabase runtime configuration
+        env:
+          POLLAPP_SUPABASE_URL: ${{ vars.POLLAPP_SUPABASE_URL }}
+          POLLAPP_SUPABASE_PUBLISHABLE_KEY: ${{ vars.POLLAPP_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run supabase:config
+
       - name: Build Angular application
         run: npm run build -- --configuration production --base-href /PollApp/
 
