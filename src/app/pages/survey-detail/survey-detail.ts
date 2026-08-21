@@ -34,8 +34,12 @@ export class SurveyDetail {
   private readonly submittedSurveyId = signal<string | null>(null);
 
   protected readonly resultsExpanded = signal(true);
+  protected readonly isSubmitting = signal(false);
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
   protected readonly isReadOnly = computed(() => this.survey()?.status === 'past');
+  protected readonly voteError = computed(() =>
+    this.surveyStore.error() === 'Unable to submit your vote.' ? this.surveyStore.error() : null,
+  );
   protected readonly canSubmit = computed(() => {
     const survey = this.survey();
     const selectedAnswers = this.selectedAnswersState();
@@ -43,6 +47,7 @@ export class SurveyDetail {
     return (
       !!survey &&
       survey.status === 'active' &&
+      !this.isSubmitting() &&
       survey.questions.length > 0 &&
       survey.questions.every((question) => (selectedAnswers[question.id]?.length ?? 0) > 0)
     );
@@ -74,7 +79,7 @@ export class SurveyDetail {
   }
 
   protected selectAnswer(question: SurveyQuestion, answerId: string): void {
-    if (this.isReadOnly() || this.hasSubmitted()) {
+    if (this.isReadOnly() || this.isSubmitting() || this.hasSubmitted()) {
       return;
     }
 
@@ -96,7 +101,13 @@ export class SurveyDetail {
 
     const survey = this.survey();
 
-    if (!survey || this.isReadOnly() || !this.canSubmit() || this.hasSubmitted()) {
+    if (
+      !survey ||
+      this.isReadOnly() ||
+      this.isSubmitting() ||
+      !this.canSubmit() ||
+      this.hasSubmitted()
+    ) {
       return;
     }
 
@@ -105,8 +116,17 @@ export class SurveyDetail {
       answerIds: this.selectedAnswersState()[question.id] ?? [],
     }));
 
-    if (await this.surveyStore.submitVote(survey.id, selections)) {
-      this.submittedSurveyId.set(survey.id);
+    this.surveyStore.clearError();
+    this.isSubmitting.set(true);
+
+    try {
+      if (await this.surveyStore.submitVote(survey.id, selections)) {
+        this.submittedSurveyId.set(survey.id);
+      }
+    } catch {
+      // SurveyStore exposes the accessible, retryable submission error.
+    } finally {
+      this.isSubmitting.set(false);
     }
   }
 

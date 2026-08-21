@@ -1,8 +1,9 @@
 # PollApp Supabase database
 
-This directory contains the database contract for PollApp. Angular reads survey data from the local
-Data API and falls back to fixtures when the API cannot be reached. Survey creation and voting still
-use the in-memory repository during this read-only integration stage.
+This directory contains the database contract for PollApp. Angular reads survey data from the
+configured Data API and falls back to fixtures when a read cannot be completed. With Supabase
+configured, survey creation and vote submission use the transactional RPCs. Failed configured
+writes are surfaced to the user and never fall back to fixture-only success.
 
 ## Data model
 
@@ -20,7 +21,10 @@ Direct writes are not granted to `anon` or `authenticated`. The security-definer
 - `create_survey(jsonb)` creates a survey with its questions and answers.
 - `submit_survey_vote(text, uuid, jsonb)` validates and stores a complete ballot.
 
-The anonymous token is a client-generated UUID used for best-effort duplicate prevention. It is not authentication and is never exposed through public read policies.
+The anonymous token is a client-generated UUID used for best-effort duplicate prevention. Angular
+reuses it from the browser's `pollapp.anonymous-voter-token` local-storage entry and retains an
+application-lifetime UUID when storage is unavailable. It is not authentication, does not create an
+Angular session, and is never exposed through public read policies.
 
 ## Migration order
 

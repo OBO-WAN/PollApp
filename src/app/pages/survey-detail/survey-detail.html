@@ -42,7 +42,12 @@
 
         <form
           class="survey-form"
-          aria-describedby="vote-instructions vote-status"
+          [attr.aria-busy]="isSubmitting()"
+          [attr.aria-describedby]="
+            voteError()
+              ? 'vote-instructions vote-status vote-error'
+              : 'vote-instructions vote-status'
+          "
           (submit)="submitVote($event)"
         >
           <p id="vote-instructions" class="visually-hidden">
@@ -86,7 +91,7 @@
                           [name]="'question-' + question.id"
                           [value]="answer.id"
                           [checked]="isAnswerSelected(question.id, answer.id)"
-                          [disabled]="isReadOnly() || hasSubmitted()"
+                          [disabled]="isReadOnly() || isSubmitting() || hasSubmitted()"
                           (change)="selectAnswer(question, answer.id)"
                         />
                         <span>
@@ -101,6 +106,10 @@
             }
           </ol>
 
+          @if (voteError(); as errorMessage) {
+            <p id="vote-error" class="vote-error" role="alert">{{ errorMessage }}</p>
+          }
+
           <p id="vote-status" class="visually-hidden" role="status" aria-live="polite">
             @if (hasSubmitted()) {
               Your vote has been recorded and the live results have been updated.
@@ -110,7 +119,7 @@
           <button
             class="complete-survey-button"
             type="submit"
-            [disabled]="isReadOnly() || !canSubmit() || hasSubmitted()"
+            [disabled]="isReadOnly() || isSubmitting() || !canSubmit() || hasSubmitted()"
           >
             @if (isReadOnly()) {
               <span>Survey closed</span>

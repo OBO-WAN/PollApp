@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
+import { SURVEY_REPOSITORY } from '../../surveys/survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
 import { SurveyDetail } from './survey-detail';
 
@@ -92,6 +93,46 @@ describe('SurveyDetail', () => {
     );
     expect(page.querySelectorAll('.answer-option input:disabled')).toHaveLength(16);
     expect(completeButton.disabled).toBe(true);
+  });
+
+  it('shows an accessible retryable error when vote persistence fails', async () => {
+    const repository = TestBed.inject(SURVEY_REPOSITORY);
+    vi.spyOn(repository, 'submitVote').mockRejectedValue(new Error('offline'));
+    const harness = await RouterTestingHarness.create();
+
+    await harness.navigateByUrl('/surveys/1', SurveyDetail);
+
+    const page = harness.routeNativeElement as HTMLElement;
+    const questions = [...page.querySelectorAll('.question-item')];
+    const initialResults = [...page.querySelectorAll('.result-value')].map((result) =>
+      result.textContent?.trim(),
+    );
+
+    for (const question of questions) {
+      (question.querySelector('input') as HTMLInputElement).click();
+    }
+    harness.detectChanges();
+
+    const completeButton = page.querySelector('.complete-survey-button') as HTMLButtonElement;
+    completeButton.click();
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+
+    const error = page.querySelector('#vote-error') as HTMLElement;
+    const inputs = [...page.querySelectorAll('.answer-option input')] as HTMLInputElement[];
+    const currentResults = [...page.querySelectorAll('.result-value')].map((result) =>
+      result.textContent?.trim(),
+    );
+
+    expect(error.getAttribute('role')).toBe('alert');
+    expect(error.textContent).toContain('Unable to submit your vote.');
+    expect(page.querySelector('form')?.getAttribute('aria-describedby')).toContain('vote-error');
+    expect(inputs.every((input) => !input.disabled)).toBe(true);
+    expect(completeButton.disabled).toBe(false);
+    expect(currentResults).toEqual(initialResults);
+    expect(page.querySelector('#vote-status')?.textContent).not.toContain(
+      'Your vote has been recorded',
+    );
   });
 
   it('toggles the responsive results panel accessibly', async () => {

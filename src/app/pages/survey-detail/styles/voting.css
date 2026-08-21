@@ -18,6 +18,17 @@
   font-weight: 600;
 }
 
+.vote-error {
+  width: 100%;
+  margin: 24px 0 0;
+  padding: 12px 16px;
+  border-left: 4px solid #b42318;
+  background-color: #fef3f2;
+  color: #912018;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 .answer-option {
   border-radius: 3px;
   cursor: pointer;

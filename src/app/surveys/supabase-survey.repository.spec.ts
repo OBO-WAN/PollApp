@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+import { AnonymousVoterToken } from './anonymous-voter-token';
 import {
   mapSupabaseSurvey,
   SUPABASE_CLIENT,
@@ -155,6 +156,79 @@ describe('SupabaseSurveyRepository', () => {
     ).rejects.toThrow('Supabase could not create the survey.');
   });
 
+  it('submits a vote through the RPC and returns refreshed persisted results', async () => {
+    const refreshedRow: SupabaseSurveyRow = {
+      id: 'survey-1',
+      category: 'Team activities',
+      title: 'Persisted vote',
+      description: '',
+      end_date: null,
+      created_at: '2026-08-20T12:00:00Z',
+      questions: [
+        {
+          id: 'question-1',
+          prompt: 'Choose one',
+          allow_multiple: false,
+          position: 1,
+          answers: [
+            {
+              id: 'answer-1',
+              text: 'A',
+              position: 1,
+              answer_results: { vote_count: 8 },
+            },
+          ],
+        },
+      ],
+    };
+    const selections = [{ questionId: 'question-1', answerIds: ['answer-1'] }];
+    const rpc = vi.fn().mockResolvedValue({ data: true, error: null });
+    const maybeSingle = vi.fn().mockResolvedValue({ data: refreshedRow, error: null });
+    const eq = vi.fn().mockReturnValue({ maybeSingle });
+    const select = vi.fn().mockReturnValue({ eq });
+    const from = vi.fn().mockReturnValue({ select });
+    const repository = provideRepository({ rpc, from } as unknown as SupabaseClient);
+
+    await expect(repository.submitVote('survey-1', selections)).resolves.toMatchObject({
+      id: 'survey-1',
+      questions: [
+        {
+          answers: [{ voteCount: 8 }],
+        },
+      ],
+    });
+
+    expect(rpc).toHaveBeenCalledWith('submit_survey_vote', {
+      p_survey_id: 'survey-1',
+      p_anonymous_token: '11111111-1111-4111-8111-111111111111',
+      p_selections: selections,
+    });
+    expect(eq).toHaveBeenCalledWith('id', 'survey-1');
+  });
+
+  it('surfaces vote submission RPC failures', async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'duplicate vote' },
+    });
+    const repository = provideRepository({ rpc } as unknown as SupabaseClient);
+
+    await expect(repository.submitVote('survey-1', [])).rejects.toThrow(
+      'Supabase could not submit the vote.',
+    );
+  });
+
+  it('does not report success when the vote RPC does not return true', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: false, error: null });
+    const from = vi.fn();
+    const repository = provideRepository({ rpc, from } as unknown as SupabaseClient);
+
+    await expect(repository.submitVote('survey-1', [])).rejects.toThrow(
+      'Supabase did not confirm the submitted vote.',
+    );
+    expect(from).not.toHaveBeenCalled();
+  });
+
   it('returns an empty collection when Supabase has no surveys', async () => {
     const repository = createRepository({ data: [], error: null });
 
@@ -181,7 +255,14 @@ function createRepository(result: { data: readonly SupabaseSurveyRow[] | null; e
 function provideRepository(client: SupabaseClient): SupabaseSurveyRepository {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [SupabaseSurveyRepository, { provide: SUPABASE_CLIENT, useValue: client }],
+    providers: [
+      SupabaseSurveyRepository,
+      { provide: SUPABASE_CLIENT, useValue: client },
+      {
+        provide: AnonymousVoterToken,
+        useValue: { value: '11111111-1111-4111-8111-111111111111' },
+      },
+    ],
   });
 
   return TestBed.inject(SupabaseSurveyRepository);

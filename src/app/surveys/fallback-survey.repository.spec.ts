@@ -14,6 +14,7 @@ describe('FallbackSurveyRepository', () => {
     listSurveys: ReturnType<typeof vi.fn>;
     getSurveyById: ReturnType<typeof vi.fn>;
     createSurvey: ReturnType<typeof vi.fn>;
+    submitVote: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -21,6 +22,7 @@ describe('FallbackSurveyRepository', () => {
       listSurveys: vi.fn(),
       getSurveyById: vi.fn(),
       createSurvey: vi.fn(),
+      submitVote: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -108,5 +110,33 @@ describe('FallbackSurveyRepository', () => {
     ).rejects.toThrow('offline');
 
     expect(fallbackCreate).not.toHaveBeenCalled();
+  });
+
+  it('delegates vote submission to Supabase without mutating fixtures', async () => {
+    const selections = [{ questionId: 'question-1', answerIds: ['answer-1'] }];
+    const persistedSurvey: Survey = {
+      id: 'survey-1',
+      category: 'Team activities',
+      title: 'Persisted vote',
+      description: '',
+      endDate: null,
+      daysRemaining: null,
+      status: 'active',
+      questions: [],
+    };
+    const fallbackSubmit = vi.spyOn(fallback, 'submitVote');
+    primary.submitVote.mockResolvedValue(persistedSurvey);
+
+    await expect(repository.submitVote('survey-1', selections)).resolves.toBe(persistedSurvey);
+    expect(primary.submitVote).toHaveBeenCalledWith('survey-1', selections);
+    expect(fallbackSubmit).not.toHaveBeenCalled();
+  });
+
+  it('surfaces Supabase vote failures without reporting fixture success', async () => {
+    const fallbackSubmit = vi.spyOn(fallback, 'submitVote');
+    primary.submitVote.mockRejectedValue(new Error('duplicate vote'));
+
+    await expect(repository.submitVote('survey-1', [])).rejects.toThrow('duplicate vote');
+    expect(fallbackSubmit).not.toHaveBeenCalled();
   });
 });
