@@ -40,6 +40,25 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+### GitHub Pages runtime configuration
+
+The GitHub Pages workflow generates `supabase-config.json` during the production build. Configure
+these repository variables under **Settings > Secrets and variables > Actions > Variables** before
+deploying:
+
+| Variable                           | Value                                                 |
+| ---------------------------------- | ----------------------------------------------------- |
+| `POLLAPP_SUPABASE_URL`             | Hosted project URL, such as `https://ref.supabase.co` |
+| `POLLAPP_SUPABASE_PUBLISHABLE_KEY` | Browser-safe `sb_publishable_...` or legacy anon key  |
+
+The generated file is copied into the GitHub Pages artifact and remains Git-ignored locally. The
+configuration writer rejects non-HTTP URLs and keys that are not browser-safe, so a missing or
+unsafe configuration fails the deployment instead of publishing a misconfigured application.
+
+Never use a secret or service-role key in Angular, GitHub repository variables, or
+`public/supabase-config.json`. Browser access is authorized by the publishable key and constrained
+by the database grants and row-level security policies in `supabase/migrations/`.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
