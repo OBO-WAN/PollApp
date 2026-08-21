@@ -46,6 +46,6 @@ export class FallbackSurveyRepository implements SurveyRepository {
     surveyId: string,
     selections: readonly SurveyVoteSelection[],
   ): Promise<Survey | undefined> {
-    return this.fallback.submitVote(surveyId, selections);
+    return this.primary.submitVote(surveyId, selections);
   }
 }

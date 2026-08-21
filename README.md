@@ -67,8 +67,11 @@ The database contract lives in [`supabase/`](supabase/README.md). It includes:
 - anonymous read policies with writes restricted to those functions;
 - seed data matching the current Angular survey fixtures.
 
-Angular reads surveys from the local Data API through `@supabase/supabase-js`. Survey creation and
-voting remain in memory until their write integration is implemented separately.
+Angular reads surveys from the configured Data API through `@supabase/supabase-js`, with fixture
+fallback when reads are unavailable. When Supabase is configured, survey creation and vote
+submission use the transactional database functions and never fall back to fixture writes. Vote
+submission uses a stable UUID stored only in the browser for best-effort duplicate prevention; it
+does not enable Angular authentication or session persistence.
 
 To start a clean local database, apply the migrations and seed, and run the database tests:
 

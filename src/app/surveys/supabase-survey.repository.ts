@@ -1,8 +1,15 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { CreateSurveyInput, Survey, SurveyAnswer, SurveyQuestion } from './survey.model';
-import { SurveyReader } from './survey.repository';
+import { AnonymousVoterToken } from './anonymous-voter-token';
+import {
+  CreateSurveyInput,
+  Survey,
+  SurveyAnswer,
+  SurveyQuestion,
+  SurveyVoteSelection,
+} from './survey.model';
+import { SurveyRepository } from './survey.repository';
 
 export const SUPABASE_CLIENT = new InjectionToken<SupabaseClient>('SUPABASE_CLIENT');
 
@@ -57,8 +64,9 @@ export interface SupabaseSurveyRow {
 }
 
 @Injectable()
-export class SupabaseSurveyRepository implements SurveyReader {
+export class SupabaseSurveyRepository implements SurveyRepository {
   private readonly client = inject(SUPABASE_CLIENT);
+  private readonly anonymousVoterToken = inject(AnonymousVoterToken);
 
   async createSurvey(input: CreateSurveyInput): Promise<Survey> {
     const { data: surveyId, error } = await this.client.rpc('create_survey', {
@@ -104,6 +112,30 @@ export class SupabaseSurveyRepository implements SurveyReader {
     }
 
     return data ? mapSupabaseSurvey(data as unknown as SupabaseSurveyRow) : undefined;
+  }
+
+  async submitVote(surveyId: string, selections: readonly SurveyVoteSelection[]): Promise<Survey> {
+    const { data: submitted, error } = await this.client.rpc('submit_survey_vote', {
+      p_survey_id: surveyId,
+      p_anonymous_token: this.anonymousVoterToken.value,
+      p_selections: selections,
+    });
+
+    if (error) {
+      throw new Error('Supabase could not submit the vote.', { cause: error });
+    }
+
+    if (submitted !== true) {
+      throw new Error('Supabase did not confirm the submitted vote.');
+    }
+
+    const survey = await this.getSurveyById(surveyId);
+
+    if (!survey) {
+      throw new Error('Supabase recorded the vote but could not load the survey.');
+    }
+
+    return survey;
   }
 }
 
