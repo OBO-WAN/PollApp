@@ -4,7 +4,7 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 
 import { routes } from './app.routes';
 import { SurveyStore } from './surveys/survey-store';
@@ -12,7 +12,7 @@ import { SurveyStore } from './surveys/survey-store';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation()),
     provideAppInitializer(() => {
       void inject(SurveyStore)
         .loadSurveys()

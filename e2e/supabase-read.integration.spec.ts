@@ -44,7 +44,7 @@ test('shows fixture data and a warning when the local API is unavailable', async
 test('creates a survey in Supabase and persists it across a browser reload', async ({ page }) => {
   const surveyTitle = 'Supabase create integration';
 
-  await page.goto('/surveys/new');
+  await page.goto('/#/surveys/new');
   await page.locator('#survey-title').fill(surveyTitle);
   await page.locator('#survey-description').fill('Created by the Supabase integration test.');
   await page.locator('#survey-category').selectOption('Workplace culture');
