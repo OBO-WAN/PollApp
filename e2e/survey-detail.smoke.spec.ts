@@ -42,7 +42,7 @@ for (const survey of endingSoonSurveys) {
       .first()
       .click();
 
-    await expect(page).toHaveURL(new RegExp(`/surveys/${survey.id}$`));
+    await expect(page).toHaveURL(new RegExp(`/#/surveys/${survey.id}$`));
     await expect(page.getByRole('heading', { name: survey.title })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Survey results LIVE' })).toBeVisible();
     await expect(page.getByText(survey.firstQuestion).first()).toBeVisible();
@@ -54,7 +54,7 @@ for (const survey of endingSoonSurveys) {
 }
 
 test('submits a vote once and refreshes the live results', async ({ page }) => {
-  await page.goto('/surveys/1');
+  await page.goto('/#/surveys/1');
 
   const questions = page.locator('.question-item');
   const completeButton = page.getByRole('button', { name: 'Complete survey' });
@@ -82,7 +82,7 @@ test('opens a past survey with final results and no voting controls enabled', as
   await page.getByRole('button', { name: 'Past survey' }).click();
   await page.getByRole('link', { name: 'View survey: How do you feel about remote work?' }).click();
 
-  await expect(page).toHaveURL(/\/surveys\/7$/);
+  await expect(page).toHaveURL(/\/#\/surveys\/7$/);
   await expect(
     page.getByRole('heading', { name: 'How do you feel about remote work?' }),
   ).toBeVisible();

@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
 
 test('matches the 375px survey voting composition and results accordion', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/surveys/1');
+  await page.goto('/#/surveys/1');
 
   await expect(page.locator('.app-logo')).toBeVisible();
   await expect(page.locator('.create-survey-link')).toBeHidden();
@@ -54,7 +54,7 @@ test('matches the 375px survey voting composition and results accordion', async 
 
 test('avoids horizontal overflow at the 320px minimum width', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 812 });
-  await page.goto('/surveys/1');
+  await page.goto('/#/surveys/1');
 
   const pageHasOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -67,7 +67,7 @@ test('avoids horizontal overflow at the 320px minimum width', async ({ page }) =
 
 test('keeps survey voting fluid at tablet width', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
-  await page.goto('/surveys/1');
+  await page.goto('/#/surveys/1');
 
   await expect(page.locator('.create-survey-link')).toBeVisible();
   await expect(page.locator('.survey-card')).toHaveCSS('width', '688px');
@@ -82,7 +82,7 @@ test('keeps survey voting fluid at tablet width', async ({ page }) => {
 
 test('uses the same mobile result accordion for a past survey', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/surveys/7');
+  await page.goto('/#/surveys/7');
 
   await expect(
     page.getByText('This survey has ended. Final results are shown below.'),

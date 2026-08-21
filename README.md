@@ -42,6 +42,12 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ### GitHub Pages runtime configuration
 
+GitHub Pages uses hash-based Angular routes, such as
+`https://obo-wan.github.io/PollApp/#/surveys/1`. The fragment stays in the browser, so opening or
+refreshing a survey requests the `/PollApp/` root document with HTTP 200 instead of requesting a
+nested path that GitHub Pages cannot rewrite. Local development uses the same route format, such as
+`http://localhost:4200/#/surveys/1`.
+
 The GitHub Pages workflow generates `supabase-config.json` during the production build. Configure
 these repository variables under **Settings > Secrets and variables > Actions > Variables** before
 deploying:

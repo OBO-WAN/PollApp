@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
 
 test('matches the 375px Create Survey composition as the form grows', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/surveys/new');
+  await page.goto('/#/surveys/new');
 
   await expect(page.locator('.create-page-logo')).toBeVisible();
   await expect(page.locator('.survey-editor')).toHaveCSS('border-top-right-radius', '100px');
@@ -61,7 +61,7 @@ test('matches the 375px Create Survey composition as the form grows', async ({ p
 
 test('keeps the Create Survey form fluid at tablet width', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
-  await page.goto('/surveys/new');
+  await page.goto('/#/surveys/new');
 
   await expect(page.locator('.survey-details')).toHaveCSS('grid-template-columns', '576px');
   await expect(page.locator('.question-builder')).toHaveCSS('grid-template-columns', '576px');
