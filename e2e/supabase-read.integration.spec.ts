@@ -132,3 +132,44 @@ test('submits a persistent vote and surfaces a duplicate without fixture fallbac
   await expect(selectedResult).toHaveText('4%');
   await expect(page.getByRole('button', { name: 'Complete survey' })).toBeEnabled();
 });
+
+test('updates results in another browser without reloading', async ({ browser, page }) => {
+  const voterContext = await browser.newContext();
+  await voterContext.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, (route) =>
+    route.abort(),
+  );
+  const voterPage = await voterContext.newPage();
+
+  try {
+    await page.goto('/#/surveys/1');
+    await voterPage.goto('/#/surveys/1');
+
+    const observerResult = page.locator('.result-item').first().locator('.result-value').nth(2);
+    const observerUrl = page.url();
+    const initialResult = (await observerResult.textContent())?.trim() ?? '';
+
+    await expect(page.locator('.survey-results')).toHaveAttribute(
+      'data-realtime-status',
+      'connected',
+    );
+
+    const questions = voterPage.locator('.question-item');
+    await questions.nth(0).locator('input').nth(2).check();
+    await questions.nth(1).locator('input').first().check();
+    await questions.nth(2).locator('input').first().check();
+    await questions.nth(3).locator('input').first().check();
+
+    const voteResponse = voterPage.waitForResponse(
+      (response) =>
+        submitVoteRequestPattern.test(response.url()) && response.request().method() === 'POST',
+    );
+
+    await voterPage.getByRole('button', { name: 'Complete survey' }).click();
+    expect((await voteResponse).ok()).toBe(true);
+
+    await expect(observerResult).not.toHaveText(initialResult);
+    expect(page.url()).toBe(observerUrl);
+  } finally {
+    await voterContext.close();
+  }
+});

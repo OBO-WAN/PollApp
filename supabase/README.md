@@ -26,6 +26,9 @@ reuses it from the browser's `pollapp.anonymous-voter-token` local-storage entry
 application-lifetime UUID when storage is unavailable. It is not authentication, does not create an
 Angular session, and is never exposed through public read policies.
 
+Angular subscribes only to `UPDATE` events on `answer_results` after a Supabase-backed initial read.
+Valid Realtime payloads update the matching aggregate in the store; fixture mode ignores them.
+
 ## Migration order
 
 1. `202608180001_create_poll_schema.sql` creates relations, indexes, aggregate triggers, and timestamps.

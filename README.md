@@ -98,6 +98,9 @@ submission use the transactional database functions and never fall back to fixtu
 submission uses a stable UUID stored only in the browser for best-effort duplicate prevention; it
 does not enable Angular authentication or session persistence.
 
+Configured clients also subscribe to anonymous Realtime updates from the public aggregate
+`answer_results` table, so an open survey result view updates when another browser submits a vote.
+
 To start a clean local database, apply the migrations and seed, and run the database tests:
 
 ```bash

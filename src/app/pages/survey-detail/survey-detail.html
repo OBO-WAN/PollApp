@@ -132,7 +132,11 @@
         </form>
       </section>
 
-      <aside class="survey-results" aria-labelledby="survey-results-title">
+      <aside
+        class="survey-results"
+        aria-labelledby="survey-results-title"
+        [attr.data-realtime-status]="realtimeStatus()"
+      >
         <button
           class="results-toggle"
           type="button"

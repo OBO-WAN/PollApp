@@ -70,6 +70,31 @@ describe('SurveyStore', () => {
     expect(store.getSurveyById('2')?.questions[0].answers[0].voteCount).toBe(32);
   });
 
+  it('updates one answer result immutably for realtime events', () => {
+    const surveysBefore = store.surveys();
+    const firstSurveyBefore = store.getSurveyById('1');
+    const secondSurveyBefore = store.getSurveyById('2');
+    const answerId = firstSurveyBefore?.questions[0].answers[0].id;
+
+    expect(answerId).toBeDefined();
+
+    store.updateAnswerResult(answerId ?? '', 99);
+
+    const surveysAfter = store.surveys();
+    const firstSurveyAfter = store.getSurveyById('1');
+
+    expect(surveysAfter).not.toBe(surveysBefore);
+    expect(firstSurveyAfter).not.toBe(firstSurveyBefore);
+    expect(firstSurveyAfter?.questions[0].answers[0].voteCount).toBe(99);
+    expect(firstSurveyAfter?.questions[0].answers[1]).toBe(
+      firstSurveyBefore?.questions[0].answers[1],
+    );
+    expect(store.getSurveyById('2')).toBe(secondSurveyBefore);
+
+    store.updateAnswerResult(answerId ?? '', 99);
+    expect(store.surveys()).toBe(surveysAfter);
+  });
+
   it('rejects incomplete or invalid vote selections', async () => {
     const survey = store.getSurveyById('1');
     const initialVoteCount = survey?.questions[0].answers[0].voteCount;
