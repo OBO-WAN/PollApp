@@ -32,7 +32,7 @@ export class Home {
   protected readonly endingSoonSurveys = computed(() =>
     [...this.surveys()]
       .filter((survey) => survey.status === 'active' && survey.endDate !== null)
-      .sort((first, second) => (first.endDate ?? '').localeCompare(second.endDate ?? ''))
+      .sort(compareSurveyDeadlines)
       .slice(0, 3),
   );
 
@@ -49,12 +49,14 @@ export class Home {
     const status = this.selectedStatus();
     const category = this.selectedCategory();
 
-    return this.surveys().filter((survey) => {
-      const matchesStatus = survey.status === status;
-      const matchesCategory = category === 'All' || survey.category === category;
+    return this.surveys()
+      .filter((survey) => {
+        const matchesStatus = survey.status === status;
+        const matchesCategory = category === 'All' || survey.category === category;
 
-      return matchesStatus && matchesCategory;
-    });
+        return matchesStatus && matchesCategory;
+      })
+      .sort(compareSurveyDeadlines);
   });
 
   protected selectStatus(status: SurveyStatus): void {
@@ -174,4 +176,16 @@ export class Home {
         ?.focus();
     });
   }
+}
+
+function compareSurveyDeadlines(first: Survey, second: Survey): number {
+  if (first.endDate === null) {
+    return second.endDate === null ? 0 : 1;
+  }
+
+  if (second.endDate === null) {
+    return -1;
+  }
+
+  return first.endDate.localeCompare(second.endDate);
 }

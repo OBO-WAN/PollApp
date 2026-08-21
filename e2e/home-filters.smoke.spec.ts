@@ -32,3 +32,26 @@ test('filters the survey list with the Figma category menu', async ({ page }) =>
     'Team activities',
   ]);
 });
+
+test('orders active and past surveys by deadline', async ({ page }) => {
+  await page.goto('/');
+
+  const surveyTitles = page.locator('.survey-list-card h3');
+
+  await expect(surveyTitles).toHaveText([
+    'Let’s Plan the Next Team Event Together',
+    'Healthier future: Fit & wellness survey!',
+    'Gaming habits and favorite games!',
+    'Which games should we play at our next community night?',
+    'Which wellness activities should we offer next?',
+    'Help us choose the next team-building activity',
+  ]);
+
+  await page.getByRole('button', { name: 'Past survey' }).click();
+
+  await expect(surveyTitles).toHaveText([
+    'Weekly wellness check-in',
+    'Summer team event retrospective',
+    'How do you feel about remote work?',
+  ]);
+});
