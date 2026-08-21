@@ -80,6 +80,20 @@ export class SurveyStore {
     this.errorState.set(null);
   }
 
+  updateAnswerResult(answerId: string, voteCount: number): void {
+    this.surveysState.update((surveys) => {
+      let collectionChanged = false;
+      const updatedSurveys = surveys.map((survey) => {
+        const updatedSurvey = updateSurveyAnswerResult(survey, answerId, voteCount);
+
+        collectionChanged ||= updatedSurvey !== survey;
+        return updatedSurvey;
+      });
+
+      return collectionChanged ? updatedSurveys : surveys;
+    });
+  }
+
   private upsertSurvey(survey: Survey): void {
     this.surveysState.update((surveys) => {
       const surveyExists = surveys.some((currentSurvey) => currentSurvey.id === survey.id);
@@ -103,4 +117,24 @@ export class SurveyStore {
       this.pendingRequests.update((pendingRequests) => pendingRequests - 1);
     }
   }
+}
+
+function updateSurveyAnswerResult(survey: Survey, answerId: string, voteCount: number): Survey {
+  let surveyChanged = false;
+  const questions = survey.questions.map((question) => {
+    let questionChanged = false;
+    const answers = question.answers.map((answer) => {
+      if (answer.id !== answerId || answer.voteCount === voteCount) {
+        return answer;
+      }
+
+      surveyChanged = true;
+      questionChanged = true;
+      return { ...answer, voteCount };
+    });
+
+    return questionChanged ? { ...question, answers } : question;
+  });
+
+  return surveyChanged ? { ...survey, questions } : survey;
 }

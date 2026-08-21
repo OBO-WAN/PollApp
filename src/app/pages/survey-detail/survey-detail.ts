@@ -9,6 +9,7 @@ import {
   SurveyQuestion,
   SurveyVoteSelection,
 } from '../../surveys/survey.model';
+import { SurveyResultsRealtime } from '../../surveys/survey-results-realtime';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
@@ -25,6 +26,7 @@ import { SurveyStore } from '../../surveys/survey-store';
 })
 export class SurveyDetail {
   private readonly route = inject(ActivatedRoute);
+  private readonly surveyResultsRealtime = inject(SurveyResultsRealtime);
   private readonly surveyStore = inject(SurveyStore);
   private readonly surveyId = toSignal(
     this.route.paramMap.pipe(map((parameters) => parameters.get('surveyId'))),
@@ -35,6 +37,7 @@ export class SurveyDetail {
 
   protected readonly resultsExpanded = signal(true);
   protected readonly isSubmitting = signal(false);
+  protected readonly realtimeStatus = this.surveyResultsRealtime.status;
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
   protected readonly isReadOnly = computed(() => this.survey()?.status === 'past');
   protected readonly voteError = computed(() =>

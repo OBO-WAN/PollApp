@@ -43,6 +43,9 @@ describe('SurveyDetail', () => {
     expect(inputs.every((input) => !input.disabled)).toBe(true);
     expect(page.querySelectorAll('.answer-list[role="group"]')).toHaveLength(4);
     expect(page.querySelectorAll('.result-item')).toHaveLength(4);
+    expect(page.querySelector('.survey-results')?.getAttribute('data-realtime-status')).toBe(
+      'disabled',
+    );
     expect(page.querySelector('.survey-results')?.textContent).toContain('86%');
     expect((page.querySelector('.complete-survey-button') as HTMLButtonElement).disabled).toBe(
       true,
