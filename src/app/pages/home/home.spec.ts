@@ -50,13 +50,13 @@ describe('Home', () => {
     expect(navigate).toHaveBeenCalledWith('/surveys/new');
   });
 
-  it('shows the three earliest active surveys in deadline order', () => {
+  it('shows the highlights and active survey list in deadline order', () => {
     const highlightLinks = [
       ...fixture.nativeElement.querySelectorAll('.highlight-card'),
     ] as HTMLAnchorElement[];
-    const surveyLink = fixture.nativeElement.querySelector(
-      '.survey-list-card',
-    ) as HTMLAnchorElement;
+    const surveyLinks = [
+      ...fixture.nativeElement.querySelectorAll('.survey-list-card'),
+    ] as HTMLAnchorElement[];
 
     expect(highlightLinks).toHaveLength(3);
     expect(highlightLinks.map((link) => link.getAttribute('href'))).toEqual([
@@ -69,7 +69,52 @@ describe('Home', () => {
       'Healthier future: Fit & wellness survey!',
       'Gaming habits and favorite games!',
     ]);
-    expect(surveyLink.getAttribute('href')).toBe('/surveys/1');
+    expect(surveyLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/surveys/1',
+      '/surveys/4',
+      '/surveys/2',
+      '/surveys/3',
+      '/surveys/5',
+      '/surveys/6',
+    ]);
+  });
+
+  it('sorts past surveys by deadline and keeps no-deadline surveys last', async () => {
+    await store.createSurvey({
+      category: 'Team activities',
+      title: 'No deadline survey',
+      description: '',
+      endDate: null,
+      questions: [],
+    });
+    fixture.detectChanges();
+
+    const visibleTitles = () =>
+      ([...fixture.nativeElement.querySelectorAll('.survey-list-card h3')] as HTMLElement[]).map(
+        (heading) => heading.textContent?.trim(),
+      );
+
+    expect(visibleTitles()).toEqual([
+      'Let’s Plan the Next Team Event Together',
+      'Healthier future: Fit & wellness survey!',
+      'Gaming habits and favorite games!',
+      'Which games should we play at our next community night?',
+      'Which wellness activities should we offer next?',
+      'Help us choose the next team-building activity',
+      'No deadline survey',
+    ]);
+
+    const pastSurveyButton = (
+      [...fixture.nativeElement.querySelectorAll('.filter-pill')] as HTMLButtonElement[]
+    ).find((button) => button.textContent?.trim() === 'Past survey') as HTMLButtonElement;
+    pastSurveyButton.click();
+    fixture.detectChanges();
+
+    expect(visibleTitles()).toEqual([
+      'Weekly wellness check-in',
+      'Summer team event retrospective',
+      'How do you feel about remote work?',
+    ]);
   });
 
   it('opens the category listbox and filters surveys by the selected option', () => {
