@@ -1,6 +1,56 @@
 # PollApp
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.2.
+PollApp is a responsive Angular survey application for creating polls, collecting anonymous votes,
+and watching aggregate results update live through Supabase.
+
+**Live application:** [obo-wan.github.io/PollApp](https://obo-wan.github.io/PollApp/)
+
+## Application preview
+
+![PollApp home page with ending-soon surveys](docs/images/pollapp-home-desktop.png)
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/images/pollapp-create-survey-desktop.png" alt="Create Survey form on desktop" />
+    </td>
+    <td width="50%">
+      <img src="docs/images/pollapp-survey-detail-desktop.png" alt="Survey voting and live results on desktop" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Create a survey</strong></td>
+    <td align="center"><strong>Vote and follow live results</strong></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/images/pollapp-home-mobile.png" alt="Responsive PollApp home page on mobile" width="300" />
+  <br />
+  <strong>Responsive mobile layout</strong>
+</p>
+
+## Checklist coverage
+
+The five functional user stories from the Poll-App project checklist are implemented:
+
+| User story         | Implementation                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------- |
+| Ending soon        | Active surveys are ordered chronologically by their deadline.                                   |
+| Survey overview    | Active and past surveys can be browsed and filtered by category.                                |
+| Create survey      | The form supports questions, answers, categories, optional deadlines, and validation.           |
+| Survey details     | Published surveys show their questions, answer options, metadata, and current results.          |
+| Voting and results | Anonymous votes persist transactionally and aggregate results update through Supabase Realtime. |
+
+## Technical highlights
+
+- Angular 22 standalone components with strict TypeScript configuration.
+- Responsive desktop, tablet, and mobile layouts based on the supplied Figma designs.
+- Supabase Postgres migrations, row-level security, transactional RPCs, seed data, and pgTAP tests.
+- Browser-safe runtime configuration for local development and GitHub Pages deployment.
+- Fixture fallback for unavailable reads without disguising failed configured writes.
+- Hash-based routing so GitHub Pages survey links remain reload-safe.
+- Vitest unit tests and Playwright browser coverage for the principal workflows and viewports.
 
 ## Development server
 
@@ -65,23 +115,21 @@ Never use a secret or service-role key in Angular, GitHub repository variables, 
 `public/supabase-config.json`. Browser access is authorized by the publishable key and constrained
 by the database grants and row-level security policies in `supabase/migrations/`.
 
-## Running unit tests
+## Verification
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Run formatting, unit tests, and an Angular build together:
 
 ```bash
-ng test
+npm run verify
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Run the complete Playwright suite:
 
 ```bash
 npm run test:e2e
 ```
 
-The Playwright suite covers the main survey workflows and responsive viewports.
+The Playwright suite covers the principal survey workflows and responsive viewports.
 
 ## Supabase database
 
@@ -115,6 +163,6 @@ Run the focused browser integration after the local stack has started:
 npm run test:e2e:supabase
 ```
 
-## Additional Resources
+## Additional resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

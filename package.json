@@ -14,7 +14,9 @@
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
     "supabase:test": "supabase test db",
-    "supabase:verify": "supabase start && supabase db reset && supabase test db"
+    "supabase:verify": "supabase start && supabase db reset && supabase test db",
+    "format:check": "prettier --check . --ignore-unknown",
+    "verify": "npm run format:check && npm test -- --watch=false && npm run build"
   },
   "private": true,
   "packageManager": "npm@10.9.8",
