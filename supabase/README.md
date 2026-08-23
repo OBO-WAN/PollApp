@@ -18,7 +18,7 @@ writes are surfaced to the user and never fall back to fixture-only success.
 
 Direct writes are not granted to `anon` or `authenticated`. The security-definer functions validate input and perform each multi-table write in one transaction:
 
-- `create_survey(jsonb)` creates a survey with its questions and answers.
+- `create_survey(jsonb)` creates a survey with its questions and up to six answers per question.
 - `submit_survey_vote(text, uuid, jsonb)` validates and stores a complete ballot.
 
 The anonymous token is a client-generated UUID used for best-effort duplicate prevention. Angular
@@ -34,6 +34,7 @@ Valid Realtime payloads update the matching aggregate in the store; fixture mode
 1. `202608180001_create_poll_schema.sql` creates relations, indexes, aggregate triggers, and timestamps.
 2. `202608180002_create_poll_rpc.sql` creates the validated write functions.
 3. `202608180003_configure_poll_access.sql` enables RLS, grants the minimum public access, and enables realtime aggregate updates.
+4. `202608230001_limit_survey_answers.sql` caps newly created questions at six answers.
 
 `seed.sql` mirrors the current Angular fixtures. It creates deterministic anonymous ballots so the resulting aggregate counts match the fixture results.
 
@@ -81,7 +82,9 @@ select count(*) as votes from public.votes;
 select count(*) as selections from public.vote_selections;
 ```
 
-The seeded baseline is 9 surveys, 18 questions, 71 answers, and 600 anonymous ballots. Selection totals vary because multi-choice questions may contain more than one answer.
+The seeded baseline is 9 surveys, 24 questions, 95 answers, and 900 anonymous ballots. Every
+survey contains voting content. Selection totals vary because multi-choice questions may contain
+more than one answer.
 
 The database tests additionally verify RLS privileges, realtime publication, transactional survey creation, vote submission, aggregate updates, duplicate-vote prevention, single-choice validation, and closed-survey behavior.
 

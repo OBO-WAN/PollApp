@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import {
@@ -11,6 +11,7 @@ import {
 } from '../../surveys/survey.model';
 import { SurveyResultsRealtime } from '../../surveys/survey-results-realtime';
 import { SurveyStore } from '../../surveys/survey-store';
+import { SurveyVoteReceipt } from '../../surveys/survey-vote-receipt';
 
 @Component({
   selector: 'app-survey-detail',
@@ -26,14 +27,15 @@ import { SurveyStore } from '../../surveys/survey-store';
 })
 export class SurveyDetail {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly surveyResultsRealtime = inject(SurveyResultsRealtime);
   private readonly surveyStore = inject(SurveyStore);
+  private readonly surveyVoteReceipt = inject(SurveyVoteReceipt);
   private readonly surveyId = toSignal(
     this.route.paramMap.pipe(map((parameters) => parameters.get('surveyId'))),
     { initialValue: this.route.snapshot.paramMap.get('surveyId') },
   );
   private readonly selectedAnswersState = signal<Readonly<Record<string, readonly string[]>>>({});
-  private readonly submittedSurveyId = signal<string | null>(null);
 
   protected readonly resultsExpanded = signal(true);
   protected readonly isSubmitting = signal(false);
@@ -55,7 +57,11 @@ export class SurveyDetail {
       survey.questions.every((question) => (selectedAnswers[question.id]?.length ?? 0) > 0)
     );
   });
-  protected readonly hasSubmitted = computed(() => this.submittedSurveyId() === this.survey()?.id);
+  protected readonly hasSubmitted = computed(() => {
+    const surveyId = this.survey()?.id;
+
+    return !!surveyId && this.surveyVoteReceipt.has(surveyId);
+  });
 
   protected endDateLabel(survey: Survey): string {
     if (!survey.endDate) {
@@ -124,7 +130,8 @@ export class SurveyDetail {
 
     try {
       if (await this.surveyStore.submitVote(survey.id, selections)) {
-        this.submittedSurveyId.set(survey.id);
+        this.surveyVoteReceipt.record(survey.id);
+        await this.router.navigateByUrl('/');
       }
     } catch {
       // SurveyStore exposes the accessible, retryable submission error.

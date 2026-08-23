@@ -1,4 +1,4 @@
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
@@ -9,6 +9,7 @@ import { CreateSurvey } from './create-survey';
 describe('CreateSurvey', () => {
   let fixture: ComponentFixture<CreateSurvey>;
   let repository: SurveyRepository;
+  let router: Router;
   let store: SurveyStore;
 
   beforeEach(async () => {
@@ -18,6 +19,8 @@ describe('CreateSurvey', () => {
     }).compileComponents();
 
     repository = TestBed.inject(SURVEY_REPOSITORY);
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     store = TestBed.inject(SurveyStore);
     await store.loadSurveys();
     fixture = TestBed.createComponent(CreateSurvey);
@@ -38,7 +41,7 @@ describe('CreateSurvey', () => {
     expect(fixture.nativeElement.querySelector('.published-notice')).toBeNull();
   });
 
-  it('publishes a valid survey into the shared store', async () => {
+  it('publishes a valid survey and opens its detail page', async () => {
     const initialCount = store.surveys().length;
 
     setField('#survey-title', 'Team lunch');
@@ -52,10 +55,9 @@ describe('CreateSurvey', () => {
     fixture.detectChanges();
 
     expect(store.surveys()).toHaveLength(initialCount + 1);
-    expect(store.surveys().at(-1)?.title).toBe('Team lunch');
-    expect(fixture.nativeElement.querySelector('.published-notice')?.textContent).toContain(
-      'Your survey is now published',
-    );
+    const createdSurvey = store.surveys().at(-1);
+    expect(createdSurvey?.title).toBe('Team lunch');
+    expect(router.navigate).toHaveBeenCalledWith(['/surveys', createdSurvey?.id]);
   });
 
   it('shows an accessible error when publishing fails', async () => {
@@ -117,6 +119,22 @@ describe('CreateSurvey', () => {
     (fixture.nativeElement.querySelectorAll('.question-delete')[1] as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('.question-card')).toHaveLength(1);
+  });
+
+  it('limits every question to six answers', () => {
+    const addAnswer = fixture.nativeElement.querySelector('.text-action') as HTMLButtonElement;
+
+    for (let answerCount = 2; answerCount < 6; answerCount += 1) {
+      addAnswer.click();
+      fixture.detectChanges();
+    }
+
+    expect(fixture.nativeElement.querySelectorAll('.answer-row')).toHaveLength(6);
+    expect(addAnswer.disabled).toBe(true);
+
+    addAnswer.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.answer-row')).toHaveLength(6);
   });
 
   function setField(selector: string, value: string, eventType = 'input'): void {

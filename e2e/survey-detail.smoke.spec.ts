@@ -53,7 +53,7 @@ for (const survey of endingSoonSurveys) {
   });
 }
 
-test('submits a vote once and refreshes the live results', async ({ page }) => {
+test('submits a vote, returns home, and keeps the survey completed', async ({ page }) => {
   await page.goto('/#/surveys/1');
 
   const questions = page.locator('.question-item');
@@ -70,10 +70,16 @@ test('submits a vote once and refreshes the live results', async ({ page }) => {
 
   await completeButton.click();
 
-  await expect(page.locator('#vote-status')).toContainText('Your vote has been recorded');
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.goto('/#/surveys/1');
+
+  await expect(
+    page.getByRole('status').filter({ hasText: 'You have already completed this survey.' }),
+  ).toBeVisible();
   await expect(selectedResult).toHaveText('4%');
   await expect(page.locator('.answer-option input').first()).toBeDisabled();
-  await expect(completeButton).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Survey completed' })).toBeDisabled();
 });
 
 test('opens a past survey with final results and no voting controls enabled', async ({ page }) => {

@@ -1,18 +1,32 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
 import { SURVEY_REPOSITORY } from '../../surveys/survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
+import { SurveyVoteReceipt } from '../../surveys/survey-vote-receipt';
 import { SurveyDetail } from './survey-detail';
+
+@Component({
+  selector: 'app-test-home',
+  template: '<h1>Survey home</h1>',
+})
+class TestHome {}
 
 describe('SurveyDetail', () => {
   beforeEach(async () => {
+    localStorage.removeItem('pollapp.completed-survey-ids');
+
     await TestBed.configureTestingModule({
-      imports: [SurveyDetail],
+      imports: [SurveyDetail, TestHome],
       providers: [
         provideRouter([
+          {
+            path: '',
+            component: TestHome,
+          },
           {
             path: 'surveys/:surveyId',
             component: SurveyDetail,
@@ -53,9 +67,11 @@ describe('SurveyDetail', () => {
     expect(page.querySelector('form')).not.toBeNull();
   });
 
-  it('supports multiple and single selections, records the vote, and updates results', async () => {
+  it('records the vote, returns home, and keeps the survey completed on revisit', async () => {
     const harness = await RouterTestingHarness.create();
+    const router = TestBed.inject(Router);
     const store = TestBed.inject(SurveyStore);
+    const voteReceipt = TestBed.inject(SurveyVoteReceipt);
 
     await harness.navigateByUrl('/surveys/1', SurveyDetail);
 
@@ -84,18 +100,33 @@ describe('SurveyDetail', () => {
     harness.detectChanges();
 
     const updatedSurvey = store.getSurveyById('1');
-    const firstResultValues = page
-      .querySelectorAll('.result-item')[0]
-      .querySelectorAll('.result-value');
 
     expect(updatedSurvey?.questions[0].answers[0].voteCount).toBe(28);
     expect(updatedSurvey?.questions[0].answers[2].voteCount).toBe(4);
-    expect(firstResultValues[2].textContent?.trim()).toBe('4%');
-    expect(page.querySelector('#vote-status')?.textContent).toContain(
-      'Your vote has been recorded',
+    expect(voteReceipt.has('1')).toBe(true);
+    expect(router.url).toBe('/');
+    expect(harness.routeNativeElement?.textContent).toContain('Survey home');
+
+    await harness.navigateByUrl('/surveys/1', SurveyDetail);
+
+    const revisitedPage = harness.routeNativeElement as HTMLElement;
+    const revisitedInputs = [
+      ...revisitedPage.querySelectorAll('.answer-option input'),
+    ] as HTMLInputElement[];
+    const revisitedButton = revisitedPage.querySelector(
+      '.complete-survey-button',
+    ) as HTMLButtonElement;
+
+    expect(revisitedPage.querySelector('.survey-completed-notice')?.textContent).toContain(
+      'already completed this survey',
     );
-    expect(page.querySelectorAll('.answer-option input:disabled')).toHaveLength(16);
-    expect(completeButton.disabled).toBe(true);
+    expect(revisitedInputs.every((input) => input.disabled)).toBe(true);
+    expect(revisitedButton.textContent).toContain('Survey completed');
+    expect(revisitedButton.disabled).toBe(true);
+    expect(
+      revisitedPage.querySelectorAll('.result-item')[0].querySelectorAll('.result-value')[2]
+        .textContent,
+    ).toContain('4%');
   });
 
   it('shows an accessible retryable error when vote persistence fails', async () => {
@@ -133,9 +164,7 @@ describe('SurveyDetail', () => {
     expect(inputs.every((input) => !input.disabled)).toBe(true);
     expect(completeButton.disabled).toBe(false);
     expect(currentResults).toEqual(initialResults);
-    expect(page.querySelector('#vote-status')?.textContent).not.toContain(
-      'Your vote has been recorded',
-    );
+    expect(TestBed.inject(SurveyVoteReceipt).has('1')).toBe(false);
   });
 
   it('toggles the responsive results panel accessibly', async () => {

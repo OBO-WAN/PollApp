@@ -44,15 +44,16 @@
           class="survey-form"
           [attr.aria-busy]="isSubmitting()"
           [attr.aria-describedby]="
-            voteError()
-              ? 'vote-instructions vote-status vote-error'
-              : 'vote-instructions vote-status'
+            voteError() ? 'vote-instructions vote-error' : 'vote-instructions'
           "
           (submit)="submitVote($event)"
         >
           <p id="vote-instructions" class="visually-hidden">
             @if (isReadOnly()) {
               This survey has ended. Its answers and final results are read-only.
+            } @else if (hasSubmitted()) {
+              You have already completed this survey. Its answers are read-only and the live results
+              are shown below.
             } @else {
               Choose at least one answer for every question to complete the survey.
             }
@@ -61,6 +62,10 @@
           @if (isReadOnly()) {
             <p class="survey-closed-notice">
               This survey has ended. Final results are shown below.
+            </p>
+          } @else if (hasSubmitted()) {
+            <p class="survey-completed-notice" role="status">
+              You have already completed this survey. The live results are shown below.
             </p>
           }
 
@@ -110,12 +115,6 @@
             <p id="vote-error" class="vote-error" role="alert">{{ errorMessage }}</p>
           }
 
-          <p id="vote-status" class="visually-hidden" role="status" aria-live="polite">
-            @if (hasSubmitted()) {
-              Your vote has been recorded and the live results have been updated.
-            }
-          </p>
-
           <button
             class="complete-survey-button"
             type="submit"
@@ -123,6 +122,8 @@
           >
             @if (isReadOnly()) {
               <span>Survey closed</span>
+            } @else if (hasSubmitted()) {
+              <span>Survey completed</span>
             } @else {
               <span class="complete-survey-button__desktop-label">Complete survey</span>
               <span class="complete-survey-button__mobile-label">Complete</span>

@@ -11,7 +11,11 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { CreateSurveyInput, SURVEY_CATEGORIES } from '../../surveys/survey.model';
+import {
+  CreateSurveyInput,
+  MAX_SURVEY_ANSWERS,
+  SURVEY_CATEGORIES,
+} from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 type AnswerControl = FormControl<string>;
@@ -48,7 +52,7 @@ export class CreateSurvey {
 
   protected readonly categories = SURVEY_CATEGORIES;
   protected readonly isPublishing = signal(false);
-  protected readonly published = signal(false);
+  protected readonly maximumAnswerCount = MAX_SURVEY_ANSWERS;
   protected readonly publishError = this.surveyStore.error;
   protected readonly submitted = signal(false);
   protected readonly minimumEndDate = formatLocalDate(new Date());
@@ -80,7 +84,11 @@ export class CreateSurvey {
   }
 
   protected addAnswer(questionIndex: number): void {
-    this.answersFor(questionIndex).push(this.createAnswer());
+    const answers = this.answersFor(questionIndex);
+
+    if (answers.length < MAX_SURVEY_ANSWERS) {
+      answers.push(this.createAnswer());
+    }
   }
 
   protected removeAnswer(questionIndex: number, answerIndex: number): void {
@@ -105,7 +113,7 @@ export class CreateSurvey {
   }
 
   protected async publish(): Promise<void> {
-    if (this.isPublishing() || this.published()) {
+    if (this.isPublishing()) {
       return;
     }
 
@@ -123,17 +131,13 @@ export class CreateSurvey {
     this.isPublishing.set(true);
 
     try {
-      await this.surveyStore.createSurvey(this.createSurveyInput());
-      this.published.set(true);
+      const survey = await this.surveyStore.createSurvey(this.createSurveyInput());
+      await this.router.navigate(['/surveys', survey.id]);
     } catch {
       // SurveyStore owns the user-facing publishing error.
     } finally {
       this.isPublishing.set(false);
     }
-  }
-
-  protected returnToSurveyList(): void {
-    void this.router.navigateByUrl('/');
   }
 
   private createQuestion(): QuestionForm {
