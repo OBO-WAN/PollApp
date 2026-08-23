@@ -43,6 +43,8 @@ export interface CreateSurveyInput {
   readonly questions: readonly CreateSurveyQuestionInput[];
 }
 
+export const MAX_SURVEY_ANSWERS = 6;
+
 export const SURVEY_CATEGORIES = [
   'Team activities',
   'Gaming & Entertainment',

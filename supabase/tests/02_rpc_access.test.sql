@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = extensions, public;
 
-select plan(21);
+select plan(22);
 
 select ok(
   has_table_privilege('anon', 'public.surveys', 'SELECT'),
@@ -161,6 +161,28 @@ select results_eq(
 
 set local role anon;
 
+select throws_ok(
+  $$
+    select public.create_survey(
+      '{
+        "category": "Team activities",
+        "title": "Too many answers",
+        "description": "",
+        "endDate": null,
+        "questions": [
+          {
+            "prompt": "Choose an answer",
+            "allowMultiple": false,
+            "answers": ["One", "Two", "Three", "Four", "Five", "Six", "Seven"]
+          }
+        ]
+      }'::jsonb
+    )
+  $$,
+  'P0001',
+  'A question cannot contain more than 6 answers',
+  'survey creation rejects more than six answers per question'
+);
 select throws_ok(
   $$
     select public.submit_survey_vote(

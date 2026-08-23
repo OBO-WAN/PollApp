@@ -26,7 +26,7 @@ for (const viewport of workflowViewports) {
 
     await validateRequiredFields(page);
     await createSurvey(page, surveyTitle);
-    await openCreatedSurvey(page, surveyTitle);
+    await verifyCreatedSurvey(page, surveyTitle);
     await voteAndVerifyResults(page, surveyTitle);
   });
 }
@@ -69,23 +69,10 @@ async function createSurvey(page: Page, surveyTitle: string): Promise<void> {
 
   await page.getByRole('button', { name: 'Publish' }).click();
 
-  await expect(page.getByText('Your survey is now published')).toBeVisible();
-  await page.getByRole('button', { name: 'Return to survey list' }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/#\/surveys\/[^/]+$/);
 }
 
-async function openCreatedSurvey(page: Page, surveyTitle: string): Promise<void> {
-  await page
-    .getByRole('button', { name: /Filter surveys by category\. Current selection:/ })
-    .click();
-  await page.getByRole('option', { name: 'Workplace culture' }).click();
-
-  const surveyLink = page.getByRole('link', { name: `View survey: ${surveyTitle}` });
-
-  await expect(surveyLink).toContainText('Workplace culture');
-  await expect(surveyLink).toContainText('No deadline');
-  await surveyLink.click();
-
+async function verifyCreatedSurvey(page: Page, surveyTitle: string): Promise<void> {
   await expect(page.getByRole('heading', { name: surveyTitle })).toBeVisible();
   await expect(page.getByText('Category: Workplace culture')).toBeVisible();
   await expect(
@@ -112,19 +99,16 @@ async function voteAndVerifyResults(page: Page, surveyTitle: string): Promise<vo
   await expect(completeButton).toBeEnabled();
   await completeButton.click();
 
-  await expect(page.locator('#vote-status')).toContainText('Your vote has been recorded');
+  await expect(page).toHaveURL(/\/$/);
+  const surveyLink = page.getByRole('link', { name: `View survey: ${surveyTitle}` });
+  await expect(surveyLink).toBeVisible();
+  await surveyLink.click();
+
+  await expect(
+    page.getByRole('status').filter({ hasText: 'You have already completed this survey.' }),
+  ).toBeVisible();
   await expect(resultItems.nth(0).locator('.result-value')).toHaveText(['100%', '0%']);
   await expect(resultItems.nth(1).locator('.result-value')).toHaveText(['50%', '0%', '50%']);
   await expect(page.locator('.answer-option input:enabled')).toHaveCount(0);
-  await expect(completeButton).toBeDisabled();
-
-  await page
-    .locator('.survey-form')
-    .evaluate((form) =>
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })),
-    );
-
-  await expect(page.getByRole('heading', { name: surveyTitle })).toBeVisible();
-  await expect(resultItems.nth(0).locator('.result-value')).toHaveText(['100%', '0%']);
-  await expect(resultItems.nth(1).locator('.result-value')).toHaveText(['50%', '0%', '50%']);
+  await expect(page.getByRole('button', { name: 'Survey completed' })).toBeDisabled();
 }

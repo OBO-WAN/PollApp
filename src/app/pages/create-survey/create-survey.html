@@ -230,7 +230,13 @@
                   }
                 </div>
 
-                <button class="text-action" type="button" (click)="addAnswer(questionIndex)">
+                <button
+                  class="text-action"
+                  type="button"
+                  [disabled]="answersFor(questionIndex).length >= maximumAnswerCount"
+                  [attr.aria-describedby]="'answer-limit-' + questionIndex"
+                  (click)="addAnswer(questionIndex)"
+                >
                   <span class="text-action__label">
                     <span>Add answer</span>
                     <img
@@ -241,6 +247,9 @@
                   </span>
                   <img src="assets/images/create-survey/add-circle.svg" alt="" />
                 </button>
+                <p [id]="'answer-limit-' + questionIndex" class="visually-hidden">
+                  Up to {{ maximumAnswerCount }} answers are allowed per question.
+                </p>
               </fieldset>
             }
           </div>
@@ -259,19 +268,10 @@
       }
 
       <div class="editor-actions">
-        <button class="publish-button" type="submit" [disabled]="isPublishing() || published()">
+        <button class="publish-button" type="submit" [disabled]="isPublishing()">
           {{ isPublishing() ? 'Publishing…' : 'Publish' }}
         </button>
       </div>
     </form>
-
-    @if (published()) {
-      <aside class="published-notice" role="status" aria-live="polite">
-        <p>Your survey is now published</p>
-        <button type="button" aria-label="Return to survey list" (click)="returnToSurveyList()">
-          <img src="assets/images/create-survey/close.svg" alt="" />
-        </button>
-      </aside>
-    }
   </main>
 </div>

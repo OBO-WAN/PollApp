@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = extensions, public;
 
-select plan(20);
+select plan(22);
 
 select has_table('public', 'surveys', 'surveys table exists');
 select has_table('public', 'questions', 'questions table exists');
@@ -32,32 +32,32 @@ select results_eq(
 );
 select results_eq(
   $$select count(*) from public.questions$$,
-  array[18::bigint],
-  'seed contains eighteen questions'
+  array[24::bigint],
+  'seed contains twenty-four questions'
 );
 select results_eq(
   $$select count(*) from public.answers$$,
-  array[71::bigint],
-  'seed contains seventy-one answers'
+  array[95::bigint],
+  'seed contains ninety-five answers'
 );
 select results_eq(
   $$select count(*) from public.votes$$,
-  array[600::bigint],
-  'seed contains six hundred ballots'
+  array[900::bigint],
+  'seed contains nine hundred ballots'
 );
 select results_eq(
   $$select count(*) from public.vote_selections$$,
-  array[1861::bigint],
+  array[2519::bigint],
   'seed contains the expected answer selections'
 );
 select results_eq(
   $$select count(*) from public.answer_results$$,
-  array[71::bigint],
+  array[95::bigint],
   'every answer has an aggregate result'
 );
 select results_eq(
   $$select sum(vote_count) from public.answer_results$$,
-  array[1861::numeric],
+  array[2519::numeric],
   'aggregate totals match all answer selections'
 );
 
@@ -132,6 +132,33 @@ select results_eq(
   $$,
   array[0::bigint],
   'every seeded ballot answers each question correctly'
+);
+select results_eq(
+  $$
+    select count(*)
+    from public.surveys as survey
+    where not exists (
+      select 1
+      from public.questions as question
+      where question.survey_id = survey.id
+    )
+  $$,
+  array[0::bigint],
+  'every seeded survey contains voting questions'
+);
+select results_eq(
+  $$
+    select count(*)
+    from (
+      select question.id
+      from public.questions as question
+      left join public.answers as answer on answer.question_id = question.id
+      group by question.id
+      having count(answer.id) not between 2 and 6
+    ) as invalid_question
+  $$,
+  array[0::bigint],
+  'every seeded question contains between two and six answers'
 );
 
 select * from finish();
