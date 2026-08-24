@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "npm run supabase:config && ng serve --o",
     "build": "ng build",
+    "build:netcup": "npm run supabase:config && ng build --configuration production --base-href /",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:e2e": "playwright test",

@@ -3,7 +3,9 @@
 PollApp is a responsive Angular survey application for creating polls, collecting anonymous votes,
 and watching aggregate results update live through Supabase.
 
-**Live application:** [obo-wan.github.io/PollApp](https://obo-wan.github.io/PollApp/)
+**Production:** [pollapp.naranjo.io](https://pollapp.naranjo.io/)
+
+**GitHub Pages:** [obo-wan.github.io/PollApp](https://obo-wan.github.io/PollApp/)
 
 ## Application preview
 
@@ -47,9 +49,9 @@ The five functional user stories from the Poll-App project checklist are impleme
 - Angular 22 standalone components with strict TypeScript configuration.
 - Responsive desktop, tablet, and mobile layouts based on the supplied Figma designs.
 - Supabase Postgres migrations, row-level security, transactional RPCs, seed data, and pgTAP tests.
-- Browser-safe runtime configuration for local development and GitHub Pages deployment.
+- Browser-safe runtime configuration for local development, netcup, and GitHub Pages deployment.
 - Fixture fallback for unavailable reads without disguising failed configured writes.
-- Hash-based routing so GitHub Pages survey links remain reload-safe.
+- Hash-based routing so survey links remain reload-safe on static hosting.
 - Vitest unit tests and Playwright browser coverage for the principal workflows and viewports.
 
 ## Development server
@@ -111,9 +113,27 @@ The generated file is copied into the GitHub Pages artifact and remains Git-igno
 configuration writer rejects non-HTTP URLs and keys that are not browser-safe, so a missing or
 unsafe configuration fails the deployment instead of publishing a misconfigured application.
 
-Never use a secret or service-role key in Angular, GitHub repository variables, or
-`public/supabase-config.json`. Browser access is authorized by the publishable key and constrained
-by the database grants and row-level security policies in `supabase/migrations/`.
+### netcup production deployment
+
+netcup uses the same hash-based routes and hosted Supabase project as GitHub Pages. A survey URL
+such as `https://pollapp.naranjo.io/#/surveys/1` therefore remains refresh-safe while the application
+is hosted at the domain root.
+
+Provide `POLLAPP_SUPABASE_URL` and `POLLAPP_SUPABASE_PUBLISHABLE_KEY` when creating the netcup
+production bundle:
+
+```bash
+npm run build:netcup
+```
+
+The command generates `public/supabase-config.json` and builds the application with a `/` base href.
+Upload the contents of `dist/poll-app/browser/` to the document root
+`pollapp.naranjo.io/httpdocs` using netcup's encrypted SFTP support or the Webhosting Control Panel
+file manager.
+
+Never use a secret or service-role key in Angular, GitHub repository variables, build environment
+variables, or `public/supabase-config.json`. Browser access is authorized by the publishable key and
+constrained by the database grants and row-level security policies in `supabase/migrations/`.
 
 ## Verification
 
