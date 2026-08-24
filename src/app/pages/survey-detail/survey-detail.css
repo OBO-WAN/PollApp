@@ -136,7 +136,7 @@
 .survey-layout {
   display: grid;
   grid-template-columns: 688px 315px;
-  align-items: end;
+  align-items: start;
   gap: 42px;
   margin-top: 40px;
 }

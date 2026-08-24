@@ -63,6 +63,10 @@
             <p class="survey-closed-notice">
               This survey has ended. Final results are shown below.
             </p>
+          } @else if (voteSucceeded()) {
+            <p class="survey-success-notice" role="status" aria-live="polite">
+              Thank you! Your vote was submitted successfully.
+            </p>
           } @else if (hasSubmitted()) {
             <p class="survey-completed-notice" role="status">
               You have already completed this survey. The live results are shown below.

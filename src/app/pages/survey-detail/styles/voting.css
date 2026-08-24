@@ -9,7 +9,8 @@
 }
 
 .survey-closed-notice,
-.survey-completed-notice {
+.survey-completed-notice,
+.survey-success-notice {
   width: 100%;
   margin: 24px 0 0;
   padding: 12px 16px;
@@ -17,6 +18,11 @@
   background-color: rgb(255 183 112 / 20%);
   font-size: 15px;
   font-weight: 600;
+}
+
+.survey-success-notice {
+  border-left-color: #2f7d32;
+  background-color: #edf8ed;
 }
 
 .vote-error {
@@ -55,7 +61,7 @@
 .answer-option input::after {
   color: var(--color-primary-purple);
   content: '';
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1;
 }

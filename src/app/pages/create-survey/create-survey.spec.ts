@@ -41,7 +41,7 @@ describe('CreateSurvey', () => {
     expect(fixture.nativeElement.querySelector('.published-notice')).toBeNull();
   });
 
-  it('publishes a valid survey and opens its detail page', async () => {
+  it('shows publishing feedback before opening the new survey', async () => {
     const initialCount = store.surveys().length;
 
     setField('#survey-title', 'Team lunch');
@@ -57,6 +57,13 @@ describe('CreateSurvey', () => {
     expect(store.surveys()).toHaveLength(initialCount + 1);
     const createdSurvey = store.surveys().at(-1);
     expect(createdSurvey?.title).toBe('Team lunch');
+    expect(fixture.nativeElement.querySelector('.published-notice')?.textContent).toContain(
+      'Your survey is now published',
+    );
+    expect(router.navigate).not.toHaveBeenCalled();
+
+    await waitForSuccessRedirect();
+
     expect(router.navigate).toHaveBeenCalledWith(['/surveys', createdSurvey?.id]);
   });
 
@@ -154,5 +161,9 @@ describe('CreateSurvey', () => {
     const day = String(date.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+  }
+
+  function waitForSuccessRedirect(): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, 1600));
   }
 });

@@ -1,12 +1,12 @@
 import { Component, computed, ElementRef, HostListener, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 
 import { Survey, SurveyStatus } from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterOutlet],
   templateUrl: './home.html',
   styleUrls: [
     './home.css',
@@ -44,6 +44,7 @@ export class Home {
   protected readonly selectedStatus = signal<SurveyStatus>('active');
   protected readonly selectedCategory = signal('All');
   protected readonly isCategoryMenuOpen = signal(false);
+  protected readonly isCreationModalOpen = signal(false);
 
   protected readonly visibleSurveys = computed(() => {
     const status = this.selectedStatus();
@@ -138,6 +139,10 @@ export class Home {
 
   protected startSurveyCreation(): void {
     void this.router.navigateByUrl('/surveys/new');
+  }
+
+  protected setCreationModalOpen(isOpen: boolean): void {
+    this.isCreationModalOpen.set(isOpen);
   }
 
   protected deadlineLabel(survey: Survey): string {

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -13,6 +13,8 @@ import { SurveyResultsRealtime } from '../../surveys/survey-results-realtime';
 import { SurveyStore } from '../../surveys/survey-store';
 import { SurveyVoteReceipt } from '../../surveys/survey-vote-receipt';
 
+const SUCCESS_REDIRECT_DELAY_MS = 1500;
+
 @Component({
   selector: 'app-survey-detail',
   imports: [RouterLink],
@@ -25,7 +27,7 @@ import { SurveyVoteReceipt } from '../../surveys/survey-vote-receipt';
     './styles/responsive.css',
   ],
 })
-export class SurveyDetail {
+export class SurveyDetail implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly surveyResultsRealtime = inject(SurveyResultsRealtime);
@@ -39,6 +41,7 @@ export class SurveyDetail {
 
   protected readonly resultsExpanded = signal(true);
   protected readonly isSubmitting = signal(false);
+  protected readonly voteSucceeded = signal(false);
   protected readonly realtimeStatus = this.surveyResultsRealtime.status;
   protected readonly survey = computed(() => this.surveyStore.getSurveyById(this.surveyId()));
   protected readonly isReadOnly = computed(() => this.survey()?.status === 'past');
@@ -74,9 +77,14 @@ export class SurveyDetail {
   }
 
   protected resultPercentage(question: SurveyQuestion, answer: SurveyAnswer): number {
-    const totalVotes = question.answers.reduce((total, current) => total + current.voteCount, 0);
+    const totalVotes = question.answers.reduce(
+      (total, current) => total + this.previewVoteCount(question, current),
+      0,
+    );
 
-    return totalVotes === 0 ? 0 : Math.round((answer.voteCount / totalVotes) * 100);
+    return totalVotes === 0
+      ? 0
+      : Math.round((this.previewVoteCount(question, answer) / totalVotes) * 100);
   }
 
   protected answerLabel(answerIndex: number): string {
@@ -131,12 +139,22 @@ export class SurveyDetail {
     try {
       if (await this.surveyStore.submitVote(survey.id, selections)) {
         this.surveyVoteReceipt.record(survey.id);
-        await this.router.navigateByUrl('/');
+        this.voteSucceeded.set(true);
+        this.redirectTimer = setTimeout(
+          () => void this.router.navigateByUrl('/'),
+          SUCCESS_REDIRECT_DELAY_MS,
+        );
       }
     } catch {
       // SurveyStore exposes the accessible, retryable submission error.
     } finally {
       this.isSubmitting.set(false);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.redirectTimer !== undefined) {
+      clearTimeout(this.redirectTimer);
     }
   }
 
@@ -150,6 +168,15 @@ export class SurveyDetail {
     answerIndex: number,
   ): string {
     return `${this.answerLabel(answerIndex)}: ${this.resultPercentage(question, answer)} percent`;
+  }
+
+  private redirectTimer: ReturnType<typeof setTimeout> | undefined;
+
+  private previewVoteCount(question: SurveyQuestion, answer: SurveyAnswer): number {
+    const shouldPreview =
+      !this.isReadOnly() && !this.hasSubmitted() && this.isAnswerSelected(question.id, answer.id);
+
+    return answer.voteCount + (shouldPreview ? 1 : 0);
   }
 }
 

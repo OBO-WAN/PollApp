@@ -67,7 +67,7 @@ describe('SurveyDetail', () => {
     expect(page.querySelector('form')).not.toBeNull();
   });
 
-  it('records the vote, returns home, and keeps the survey completed on revisit', async () => {
+  it('records the vote, shows feedback, then returns home and stays completed', async () => {
     const harness = await RouterTestingHarness.create();
     const router = TestBed.inject(Router);
     const store = TestBed.inject(SurveyStore);
@@ -104,6 +104,14 @@ describe('SurveyDetail', () => {
     expect(updatedSurvey?.questions[0].answers[0].voteCount).toBe(28);
     expect(updatedSurvey?.questions[0].answers[2].voteCount).toBe(4);
     expect(voteReceipt.has('1')).toBe(true);
+    expect(page.querySelector('.survey-success-notice')?.textContent).toContain(
+      'Your vote was submitted successfully',
+    );
+    expect(router.url).toBe('/surveys/1');
+
+    await waitForSuccessRedirect();
+    harness.detectChanges();
+
     expect(router.url).toBe('/');
     expect(harness.routeNativeElement?.textContent).toContain('Survey home');
 
@@ -147,6 +155,12 @@ describe('SurveyDetail', () => {
     }
     harness.detectChanges();
 
+    const previewResults = [...page.querySelectorAll('.result-value')].map((result) =>
+      result.textContent?.trim(),
+    );
+
+    expect(previewResults).not.toEqual(initialResults);
+
     const completeButton = page.querySelector('.complete-survey-button') as HTMLButtonElement;
     completeButton.click();
     await harness.fixture.whenStable();
@@ -163,7 +177,7 @@ describe('SurveyDetail', () => {
     expect(page.querySelector('form')?.getAttribute('aria-describedby')).toContain('vote-error');
     expect(inputs.every((input) => !input.disabled)).toBe(true);
     expect(completeButton.disabled).toBe(false);
-    expect(currentResults).toEqual(initialResults);
+    expect(currentResults).toEqual(previewResults);
     expect(TestBed.inject(SurveyVoteReceipt).has('1')).toBe(false);
   });
 
@@ -254,3 +268,7 @@ describe('SurveyDetail', () => {
     expect(page.querySelector('.not-found a')?.getAttribute('href')).toBe('/');
   });
 });
+
+function waitForSuccessRedirect(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 1600));
+}

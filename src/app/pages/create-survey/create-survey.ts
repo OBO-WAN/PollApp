@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnDestroy, signal } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -38,13 +38,15 @@ const notPastDate: ValidatorFn = (control) => {
   return control.value >= formatLocalDate(new Date()) ? null : { pastDate: true };
 };
 
+const SUCCESS_REDIRECT_DELAY_MS = 1500;
+
 @Component({
   selector: 'app-create-survey',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './create-survey.html',
   styleUrls: ['./create-survey.css', './styles/form.css', './styles/responsive.css'],
 })
-export class CreateSurvey {
+export class CreateSurvey implements OnDestroy {
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
@@ -52,6 +54,7 @@ export class CreateSurvey {
 
   protected readonly categories = SURVEY_CATEGORIES;
   protected readonly isPublishing = signal(false);
+  protected readonly publishedSurveyId = signal<string | null>(null);
   protected readonly maximumAnswerCount = MAX_SURVEY_ANSWERS;
   protected readonly publishError = this.surveyStore.error;
   protected readonly submitted = signal(false);
@@ -113,7 +116,7 @@ export class CreateSurvey {
   }
 
   protected async publish(): Promise<void> {
-    if (this.isPublishing()) {
+    if (this.isPublishing() || this.publishedSurveyId()) {
       return;
     }
 
@@ -132,11 +135,47 @@ export class CreateSurvey {
 
     try {
       const survey = await this.surveyStore.createSurvey(this.createSurveyInput());
-      await this.router.navigate(['/surveys', survey.id]);
+      this.publishedSurveyId.set(survey.id);
+      this.surveyForm.disable();
+      this.redirectTimer = setTimeout(() => this.openPublishedSurvey(), SUCCESS_REDIRECT_DELAY_MS);
     } catch {
       // SurveyStore owns the user-facing publishing error.
     } finally {
       this.isPublishing.set(false);
+    }
+  }
+
+  protected openPublishedSurvey(): void {
+    const surveyId = this.publishedSurveyId();
+
+    if (!surveyId) {
+      return;
+    }
+
+    this.clearRedirectTimer();
+    void this.router.navigate(['/surveys', surveyId]);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected closeDialog(): void {
+    if (this.publishedSurveyId()) {
+      this.openPublishedSurvey();
+      return;
+    }
+
+    void this.router.navigateByUrl('/');
+  }
+
+  ngOnDestroy(): void {
+    this.clearRedirectTimer();
+  }
+
+  private redirectTimer: ReturnType<typeof setTimeout> | undefined;
+
+  private clearRedirectTimer(): void {
+    if (this.redirectTimer !== undefined) {
+      clearTimeout(this.redirectTimer);
+      this.redirectTimer = undefined;
     }
   }
 

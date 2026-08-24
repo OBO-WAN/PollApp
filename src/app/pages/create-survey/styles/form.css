@@ -35,7 +35,7 @@
 
 .field-group .required-label,
 .answer-heading .required-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .field-with-action {
@@ -96,8 +96,17 @@
 .field-error {
   margin: 0;
   color: #ffd7d7;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.field-error--reserved {
+  min-height: 20px;
+  visibility: hidden;
+}
+
+.field-error--visible {
+  visibility: visible;
 }
 
 .compact-fields {
@@ -205,7 +214,7 @@
   align-items: center;
   gap: 4px;
   color: #fefdff;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 17px;
 }
 
@@ -226,7 +235,7 @@
 .answer-row {
   display: grid;
   grid-template-columns: 23px minmax(0, 1fr) 26px;
-  align-items: center;
+  align-items: start;
   gap: 4px;
 }
 

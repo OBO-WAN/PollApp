@@ -26,7 +26,7 @@
 @media (max-width: 650px) {
   .create-survey-page {
     padding: 48px 0 57px;
-    background-color: #fefdff;
+    background-color: rgb(34 18 39 / 72%);
   }
 
   .create-page-header {
@@ -218,6 +218,6 @@
 
 @media (max-width: 420px) {
   .multiple-answer-option {
-    font-size: 10px;
+    font-size: 14px;
   }
 }

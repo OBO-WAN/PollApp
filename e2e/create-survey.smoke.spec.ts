@@ -9,6 +9,9 @@ test('opens the new survey page from Home', async ({ page }) => {
   await page.getByRole('button', { name: 'New survey' }).click();
 
   await expect(page).toHaveURL(/\/#\/surveys\/new$/);
+  await expect(page.getByRole('dialog', { name: 'Create new survey' })).toBeVisible();
+  await expect(page.locator('.home-page')).toBeVisible();
+  await expect(page.locator('.home-page')).toHaveAttribute('inert', '');
   await expect(page.getByRole('heading', { name: 'Create new survey' })).toBeVisible();
 });
 

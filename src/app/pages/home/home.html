@@ -1,4 +1,9 @@
-<div class="home-page" [attr.data-survey-source]="dataSource()">
+<div
+  class="home-page"
+  [attr.data-survey-source]="dataSource()"
+  [attr.aria-hidden]="isCreationModalOpen() ? 'true' : null"
+  [attr.inert]="isCreationModalOpen() ? '' : null"
+>
   <header class="site-header">
     <a class="logo" href="./" aria-label="Poll App home">
       <span class="logo__mark" aria-hidden="true">
@@ -209,3 +214,5 @@
     </section>
   </main>
 </div>
+
+<router-outlet (activate)="setCreationModalOpen(true)" (deactivate)="setCreationModalOpen(false)" />
