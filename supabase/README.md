@@ -35,6 +35,7 @@ Valid Realtime payloads update the matching aggregate in the store; fixture mode
 2. `202608180002_create_poll_rpc.sql` creates the validated write functions.
 3. `202608180003_configure_poll_access.sql` enables RLS, grants the minimum public access, and enables realtime aggregate updates.
 4. `202608230001_limit_survey_answers.sql` caps newly created questions at six answers.
+5. `202608240001_remove_invalid_mentor_test_survey.sql` removes the known mentor test survey that predates the six-answer limit. The migration is scoped to its exact survey ID and refuses deletion unless the survey still contains an invalid answer count.
 
 `seed.sql` mirrors the current Angular fixtures. It creates deterministic anonymous ballots so the resulting aggregate counts match the fixture results.
 
