@@ -69,6 +69,8 @@ async function createSurvey(page: Page, surveyTitle: string): Promise<void> {
 
   await page.getByRole('button', { name: 'Publish' }).click();
 
+  await expect(page.getByRole('status')).toContainText('Your survey is now published');
+  await expect(page).toHaveURL(/\/#\/surveys\/new$/);
   await expect(page).toHaveURL(/\/#\/surveys\/[^/]+$/);
 }
 
@@ -97,8 +99,12 @@ async function voteAndVerifyResults(page: Page, surveyTitle: string): Promise<vo
   await questions.nth(1).getByRole('checkbox').nth(2).check();
 
   await expect(completeButton).toBeEnabled();
+  await expect(resultItems.nth(0).locator('.result-value')).toHaveText(['100%', '0%']);
+  await expect(resultItems.nth(1).locator('.result-value')).toHaveText(['50%', '0%', '50%']);
   await completeButton.click();
 
+  await expect(page.getByRole('status')).toContainText('Your vote was submitted successfully');
+  await expect(page).toHaveURL(/\/#\/surveys\/[^/]+$/);
   await expect(page).toHaveURL(/\/$/);
   const surveyLink = page.getByRole('link', { name: `View survey: ${surveyTitle}` });
   await expect(surveyLink).toBeVisible();

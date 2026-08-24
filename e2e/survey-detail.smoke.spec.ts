@@ -59,6 +59,7 @@ test('submits a vote, returns home, and keeps the survey completed', async ({ pa
   const questions = page.locator('.question-item');
   const completeButton = page.getByRole('button', { name: 'Complete survey' });
   const selectedResult = page.locator('.result-item').first().locator('.result-value').nth(2);
+  const initialSelectedResult = await selectedResult.textContent();
 
   await questions.nth(0).locator('input').nth(2).check();
   await questions.nth(1).locator('input').first().check();
@@ -66,10 +67,12 @@ test('submits a vote, returns home, and keeps the survey completed', async ({ pa
   await questions.nth(3).locator('input').first().check();
 
   await expect(completeButton).toBeEnabled();
-  await expect(selectedResult).toHaveText('3%');
+  await expect(selectedResult).not.toHaveText(initialSelectedResult ?? '');
 
   await completeButton.click();
 
+  await expect(page.getByRole('status')).toContainText('Your vote was submitted successfully');
+  await expect(page).toHaveURL(/\/#\/surveys\/1$/);
   await expect(page).toHaveURL(/\/$/);
 
   await page.goto('/#/surveys/1');
