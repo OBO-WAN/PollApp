@@ -48,6 +48,21 @@ describe('CreateSurvey', () => {
     expect(fixture.nativeElement.querySelector('.published-notice')).toBeNull();
   });
 
+  it('omits hard-coded required labels while preserving category semantics', () => {
+    const categoryLabel = fixture.nativeElement.querySelector(
+      'label[for="survey-category"]',
+    ) as HTMLLabelElement;
+    const categorySelect = fixture.nativeElement.querySelector(
+      '#survey-category',
+    ) as HTMLSelectElement;
+
+    expect(fixture.nativeElement.querySelector('.required-label')).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toContain('(required)');
+    expect(categoryLabel.classList.contains('visually-hidden')).toBe(true);
+    expect(categorySelect.labels?.item(0)).toBe(categoryLabel);
+    expect(categorySelect.getAttribute('aria-describedby')).toBe('survey-category-error');
+  });
+
   it('shows publishing feedback before opening the new survey', async () => {
     const initialCount = store.surveys().length;
 

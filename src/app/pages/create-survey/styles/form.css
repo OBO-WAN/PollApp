@@ -28,14 +28,8 @@
   line-height: 22px;
 }
 
-.field-group label span,
-.required-label {
+.field-group label span {
   font-weight: 400;
-}
-
-.field-group .required-label,
-.answer-heading .required-label {
-  font-size: 14px;
 }
 
 .field-with-action {
@@ -52,8 +46,7 @@
 .field-group input,
 .field-group textarea,
 .question-card > input,
-.answer-row > input,
-.select-field select {
+.answer-row > input {
   width: 100%;
   border: 0;
   border-radius: 5px 20px 5px 5px;
@@ -65,8 +58,7 @@
 
 .field-group input,
 .question-card > input,
-.answer-row > input,
-.select-field select {
+.answer-row > input {
   min-height: 37px;
   padding: 7px 13px;
 }
@@ -121,13 +113,28 @@
 }
 
 .select-field select {
-  padding-right: 36px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 34px 4px 0;
+  border: 0;
+  border-radius: 0;
   appearance: none;
+  color: #fefdff;
+  background-color: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.select-field select option {
+  color: var(--color-primary-purple);
+  background-color: #fefdff;
 }
 
 .select-field > img {
   position: absolute;
-  top: 7px;
+  top: 4px;
   right: 6px;
   width: 24px;
   height: 24px;

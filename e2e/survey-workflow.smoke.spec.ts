@@ -24,11 +24,27 @@ for (const viewport of workflowViewports) {
     await page.goto('/');
     await page.getByRole('button', { name: 'New survey' }).click();
 
+    await verifyCategoryControlStyle(page);
     await validateRequiredFields(page);
     await createSurvey(page, surveyTitle);
     await verifyCreatedSurvey(page, surveyTitle);
     await voteAndVerifyResults(page, surveyTitle);
   });
+}
+
+async function verifyCategoryControlStyle(page: Page): Promise<void> {
+  const categorySelect = page.locator('#survey-category');
+
+  await expect(categorySelect).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(categorySelect).toHaveCSS('color', 'rgb(254, 253, 255)');
+  await expect(categorySelect).toHaveCSS('font-size', '18px');
+  await expect(categorySelect).toHaveCSS('font-weight', '700');
+
+  const pageHasOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+
+  expect(pageHasOverflow).toBe(false);
 }
 
 async function validateRequiredFields(page: Page): Promise<void> {
