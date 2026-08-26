@@ -118,24 +118,37 @@
               </div>
 
               <div class="field-group category-field">
-                <label for="survey-category" class="visually-hidden">Choose category</label>
-
-                <div class="select-field">
-                  <select
+                <details
+                  #categoryMenu
+                  class="category-select"
+                  (keydown.escape)="closeCategoryMenu($event, categoryMenu)"
+                >
+                  <summary
                     id="survey-category"
-                    formControlName="category"
+                    class="category-trigger"
                     [attr.aria-invalid]="showError(surveyForm.controls.category)"
                     aria-describedby="survey-category-error"
                   >
-                    <option value="" disabled>Choose category</option>
+                    <span>{{ surveyForm.controls.category.value || 'Choose category' }}</span>
+                    <img src="assets/images/dropdown-arrow.svg" alt="" aria-hidden="true" />
+                  </summary>
 
+                  <fieldset class="category-options">
+                    <legend class="visually-hidden">Choose category</legend>
                     @for (category of categories; track category) {
-                      <option [value]="category">{{ category }}</option>
+                      <label class="category-option">
+                        <input
+                          class="visually-hidden"
+                          type="radio"
+                          formControlName="category"
+                          [value]="category"
+                          (change)="selectCategory(categoryMenu)"
+                        />
+                        <span>{{ category }}</span>
+                      </label>
                     }
-                  </select>
-
-                  <img src="assets/images/dropdown-arrow.svg" alt="" aria-hidden="true" />
-                </div>
+                  </fieldset>
+                </details>
 
                 <p
                   id="survey-category-error"

@@ -52,6 +52,7 @@ const SUCCESS_REDIRECT_DELAY_MS = 1500;
   styleUrls: [
     './create-survey.css',
     './styles/form.css',
+    './styles/category-menu.css',
     './styles/feedback.css',
     './styles/button-motion.css',
     './styles/responsive.css',
@@ -131,6 +132,23 @@ export class CreateSurvey implements OnDestroy {
 
   protected showError(control: AbstractControl): boolean {
     return control.invalid && (control.touched || this.submitted());
+  }
+
+  protected selectCategory(categoryMenu: HTMLDetailsElement): void {
+    this.surveyForm.controls.category.markAsTouched();
+    categoryMenu.open = false;
+    categoryMenu.querySelector<HTMLElement>('summary')?.focus();
+  }
+
+  protected closeCategoryMenu(event: Event, categoryMenu: HTMLDetailsElement): void {
+    if (!categoryMenu.open) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    categoryMenu.open = false;
+    categoryMenu.querySelector<HTMLElement>('summary')?.focus();
   }
 
   protected async publish(): Promise<void> {

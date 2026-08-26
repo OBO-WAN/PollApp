@@ -73,7 +73,7 @@
 .field-group textarea:focus-visible,
 .question-card > input:focus-visible,
 .answer-row > input:focus-visible,
-.select-field select:focus-visible,
+.category-trigger:focus-visible,
 .multiple-answer-option input:focus-visible,
 .icon-button:focus-visible,
 .text-action:focus-visible {
@@ -108,37 +108,9 @@
   gap: 16px;
 }
 
-.select-field {
-  position: relative;
-}
-
-.select-field select {
-  width: 100%;
-  min-height: 32px;
-  padding: 4px 34px 4px 0;
-  border: 0;
-  border-radius: 0;
-  appearance: none;
-  color: #fefdff;
-  background-color: transparent;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 22px;
+#survey-end-date,
+#survey-end-date::-webkit-calendar-picker-indicator {
   cursor: pointer;
-}
-
-.select-field select option {
-  color: var(--color-primary-purple);
-  background-color: #fefdff;
-}
-
-.select-field > img {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
 }
 
 .icon-button {

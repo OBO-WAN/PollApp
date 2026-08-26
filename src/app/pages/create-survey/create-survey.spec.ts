@@ -28,6 +28,7 @@ describe('CreateSurvey', () => {
     repository = TestBed.inject(SURVEY_REPOSITORY);
     router = TestBed.inject(Router);
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     store = TestBed.inject(SurveyStore);
     await store.loadSurveys();
     fixture = TestBed.createComponent(CreateSurvey);
@@ -49,18 +50,45 @@ describe('CreateSurvey', () => {
   });
 
   it('omits hard-coded required labels while preserving category semantics', () => {
-    const categoryLabel = fixture.nativeElement.querySelector(
-      'label[for="survey-category"]',
-    ) as HTMLLabelElement;
-    const categorySelect = fixture.nativeElement.querySelector(
-      '#survey-category',
-    ) as HTMLSelectElement;
+    const categoryTrigger = fixture.nativeElement.querySelector('#survey-category') as HTMLElement;
+    const categoryLegend = fixture.nativeElement.querySelector(
+      '.category-options legend',
+    ) as HTMLLegendElement;
+    const categoryRadios = fixture.nativeElement.querySelectorAll(
+      '.category-option input[type="radio"]',
+    ) as NodeListOf<HTMLInputElement>;
 
     expect(fixture.nativeElement.querySelector('.required-label')).toBeNull();
     expect(fixture.nativeElement.textContent).not.toContain('(required)');
-    expect(categoryLabel.classList.contains('visually-hidden')).toBe(true);
-    expect(categorySelect.labels?.item(0)).toBe(categoryLabel);
-    expect(categorySelect.getAttribute('aria-describedby')).toBe('survey-category-error');
+    expect(categoryLegend.classList.contains('visually-hidden')).toBe(true);
+    expect(categoryLegend.textContent).toContain('Choose category');
+    expect(categoryRadios).toHaveLength(4);
+    expect(categoryTrigger.getAttribute('aria-describedby')).toBe('survey-category-error');
+  });
+
+  it('selects a category and closes the keyboard-accessible disclosure', () => {
+    const categoryMenu = fixture.nativeElement.querySelector(
+      '.category-select',
+    ) as HTMLDetailsElement;
+    const categoryTrigger = fixture.nativeElement.querySelector('#survey-category') as HTMLElement;
+
+    categoryMenu.open = true;
+    selectCategory('Team activities');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance['surveyForm'].controls.category.value).toBe('Team activities');
+    expect(categoryMenu.open).toBe(false);
+    expect(document.activeElement).toBe(categoryTrigger);
+
+    categoryMenu.open = true;
+    categoryTrigger.focus();
+    categoryTrigger.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+
+    expect(categoryMenu.open).toBe(false);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
   it('shows publishing feedback before opening the new survey', async () => {
@@ -70,7 +98,7 @@ describe('CreateSurvey', () => {
     setField('#question-0', 'Where should we eat?');
     setField('#answer-0-0', 'Cafe');
     setField('#answer-0-1', 'Park');
-    setField('#survey-category', 'Team activities', 'change');
+    selectCategory('Team activities');
 
     submitForm();
     await fixture.whenStable();
@@ -96,7 +124,7 @@ describe('CreateSurvey', () => {
     setField('#question-0', 'Where should we eat?');
     setField('#answer-0-0', 'Cafe');
     setField('#answer-0-1', 'Park');
-    setField('#survey-category', 'Team activities', 'change');
+    selectCategory('Team activities');
 
     submitForm();
     await fixture.whenStable();
@@ -118,7 +146,7 @@ describe('CreateSurvey', () => {
     setField('#question-0', 'Where should we eat?');
     setField('#answer-0-0', 'Cafe');
     setField('#answer-0-1', 'Park');
-    setField('#survey-category', 'Team activities', 'change');
+    selectCategory('Team activities');
 
     submitForm();
     await fixture.whenStable();
@@ -303,12 +331,27 @@ describe('CreateSurvey', () => {
     );
   }
 
+  function selectCategory(category: string): void {
+    const categoryLabels = fixture.nativeElement.querySelectorAll(
+      '.category-option',
+    ) as NodeListOf<HTMLLabelElement>;
+    const categoryRadio = [...categoryLabels]
+      .find((label) => label.textContent?.trim() === category)
+      ?.querySelector<HTMLInputElement>('input[type="radio"]');
+
+    if (!categoryRadio) {
+      throw new Error(`Missing category option: ${category}`);
+    }
+
+    categoryRadio.click();
+  }
+
   function fillValidSurvey(): void {
     setField('#survey-title', 'Team lunch');
     setField('#question-0', 'Where should we eat?');
     setField('#answer-0-0', 'Cafe');
     setField('#answer-0-1', 'Park');
-    setField('#survey-category', 'Team activities', 'change');
+    selectCategory('Team activities');
   }
 
   function submitForm(): void {
