@@ -49,7 +49,13 @@ const SUCCESS_REDIRECT_DELAY_MS = 1500;
   selector: 'app-create-survey',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './create-survey.html',
-  styleUrls: ['./create-survey.css', './styles/form.css', './styles/responsive.css'],
+  styleUrls: [
+    './create-survey.css',
+    './styles/form.css',
+    './styles/feedback.css',
+    './styles/button-motion.css',
+    './styles/responsive.css',
+  ],
 })
 export class CreateSurvey implements OnDestroy {
   private readonly formBuilder = inject(NonNullableFormBuilder);

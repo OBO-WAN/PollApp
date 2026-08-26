@@ -158,6 +158,47 @@ describe('CreateSurvey', () => {
     expect(field('#answer-0-0').maxLength).toBe(MAX_SURVEY_ANSWER_LENGTH);
   });
 
+  it('updates reserved character counters without changing the field limits', () => {
+    expect(counterText()).toEqual([
+      `0 / ${MAX_SURVEY_TITLE_LENGTH}`,
+      `0 / ${MAX_SURVEY_DESCRIPTION_LENGTH}`,
+      `0 / ${MAX_SURVEY_QUESTION_LENGTH}`,
+      `0 / ${MAX_SURVEY_ANSWER_LENGTH}`,
+      `0 / ${MAX_SURVEY_ANSWER_LENGTH}`,
+    ]);
+
+    setField('#survey-title', 'Team lunch');
+    setField('#survey-description', 'Choose a location.');
+    setField('#question-0', 'Where should we eat?');
+    setField('#answer-0-0', 'Cafe');
+    fixture.detectChanges();
+
+    expect(counterText()).toEqual([
+      `10 / ${MAX_SURVEY_TITLE_LENGTH}`,
+      `18 / ${MAX_SURVEY_DESCRIPTION_LENGTH}`,
+      `20 / ${MAX_SURVEY_QUESTION_LENGTH}`,
+      `4 / ${MAX_SURVEY_ANSWER_LENGTH}`,
+      `0 / ${MAX_SURVEY_ANSWER_LENGTH}`,
+    ]);
+
+    setField('#survey-title', 'T'.repeat(Math.ceil(MAX_SURVEY_TITLE_LENGTH * 0.9)));
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.character-counter--warning')?.textContent,
+    ).toContain(`${Math.ceil(MAX_SURVEY_TITLE_LENGTH * 0.9)} / ${MAX_SURVEY_TITLE_LENGTH}`);
+  });
+
+  it('renders the Figma publish hover icon as a decorative asset', () => {
+    const icon = fixture.nativeElement.querySelector(
+      '.publish-button__icon img',
+    ) as HTMLImageElement;
+
+    expect(icon.getAttribute('src')).toBe('assets/images/survey-complete-check.svg');
+    expect(icon.getAttribute('alt')).toBe('');
+    expect(icon.parentElement?.getAttribute('aria-hidden')).toBe('true');
+  });
+
   it('shows field-specific length errors without calling the repository', async () => {
     const createSurvey = vi.spyOn(repository, 'createSurvey');
     fillValidSurvey();
@@ -239,6 +280,12 @@ describe('CreateSurvey', () => {
 
   function field(selector: string): HTMLInputElement | HTMLTextAreaElement {
     return fixture.nativeElement.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement;
+  }
+
+  function counterText(): string[] {
+    return [...fixture.nativeElement.querySelectorAll('.character-counter')].map((counter) =>
+      (counter.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    );
   }
 
   function fillValidSurvey(): void {

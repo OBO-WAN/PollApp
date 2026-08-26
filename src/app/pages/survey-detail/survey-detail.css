@@ -114,9 +114,11 @@
 
 .create-survey-link {
   min-height: 48px;
+  overflow: hidden;
   padding: 12px 16px;
   background-color: var(--color-secondary-orange);
   font-size: 18px;
+  transition: background-color 180ms ease-out;
 }
 
 .app-logo:focus-visible,

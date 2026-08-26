@@ -1,0 +1,39 @@
+.create-survey-link__icon {
+  display: block;
+  width: 0;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    width 180ms ease-out,
+    margin-left 180ms ease-out,
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.create-survey-link__glyph {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-color: #221227;
+  mask: var(--create-survey-icon) center / 24px 24px no-repeat;
+  -webkit-mask: var(--create-survey-icon) center / 24px 24px no-repeat;
+}
+
+.create-survey-link:hover .create-survey-link__icon,
+.create-survey-link:focus-visible .create-survey-link__icon {
+  width: 24px;
+  margin-left: 10px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .create-survey-link,
+  .create-survey-link__icon {
+    transition: none;
+  }
+}

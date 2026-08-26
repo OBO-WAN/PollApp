@@ -73,6 +73,24 @@ test('keeps the Create Survey form fluid at tablet width', async ({ page }) => {
   expect(pageHasOverflow).toBe(false);
 });
 
+test('transitions the publish button into its Figma hover state', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 1000 });
+  await page.goto('/#/surveys/new');
+
+  const publishButton = page.getByRole('button', { name: 'Publish' });
+  const hoverIcon = page.locator('.publish-button__icon');
+
+  await expect(hoverIcon).toHaveCSS('width', '0px');
+  await expect(hoverIcon).toHaveCSS('opacity', '0');
+
+  await publishButton.hover();
+
+  await expect(publishButton).toHaveCSS('background-color', 'rgb(255, 183, 112)');
+  await expect(hoverIcon).toHaveCSS('width', '18px');
+  await expect(hoverIcon).toHaveCSS('margin-left', '10px');
+  await expect(hoverIcon).toHaveCSS('opacity', '1');
+});
+
 for (const viewportWidth of [981, 1200]) {
   test(`lays questions out in two columns at ${viewportWidth}px`, async ({ page }) => {
     await page.setViewportSize({ width: viewportWidth, height: 1000 });

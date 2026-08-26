@@ -60,17 +60,28 @@
                 </button>
               </div>
 
-              <p
-                id="survey-title-error"
-                class="field-error field-error--reserved"
-                [class.field-error--visible]="showError(surveyForm.controls.title)"
-              >
-                @if (surveyForm.controls.title.hasError('maxlength')) {
-                  Survey names can contain up to {{ maximumTitleLength }} characters.
-                } @else {
-                  Enter a survey name.
-                }
-              </p>
+              <div class="field-feedback">
+                <p
+                  id="survey-title-error"
+                  class="field-error field-error--reserved"
+                  [class.field-error--visible]="showError(surveyForm.controls.title)"
+                >
+                  @if (surveyForm.controls.title.hasError('maxlength')) {
+                    Survey names can contain up to {{ maximumTitleLength }} characters.
+                  } @else {
+                    Enter a survey name.
+                  }
+                </p>
+                <span
+                  class="character-counter"
+                  [class.character-counter--warning]="
+                    surveyForm.controls.title.value.length >= maximumTitleLength * 0.9
+                  "
+                  aria-hidden="true"
+                >
+                  {{ surveyForm.controls.title.value.length }} / {{ maximumTitleLength }}
+                </span>
+              </div>
             </div>
 
             <div class="compact-fields">
@@ -163,13 +174,25 @@
               </button>
             </div>
 
-            <p
-              id="survey-description-error"
-              class="field-error field-error--reserved"
-              [class.field-error--visible]="showError(surveyForm.controls.description)"
-            >
-              Descriptions can contain up to {{ maximumDescriptionLength }} characters.
-            </p>
+            <div class="field-feedback">
+              <p
+                id="survey-description-error"
+                class="field-error field-error--reserved"
+                [class.field-error--visible]="showError(surveyForm.controls.description)"
+              >
+                Descriptions can contain up to {{ maximumDescriptionLength }} characters.
+              </p>
+              <span
+                class="character-counter"
+                [class.character-counter--warning]="
+                  surveyForm.controls.description.value.length >= maximumDescriptionLength * 0.9
+                "
+                aria-hidden="true"
+              >
+                {{ surveyForm.controls.description.value.length }} /
+                {{ maximumDescriptionLength }}
+              </span>
+            </div>
           </div>
         </section>
 
@@ -204,17 +227,28 @@
                   [attr.aria-describedby]="'question-error-' + questionIndex"
                 />
 
-                <p
-                  [id]="'question-error-' + questionIndex"
-                  class="field-error field-error--reserved"
-                  [class.field-error--visible]="showError(question.controls.prompt)"
-                >
-                  @if (question.controls.prompt.hasError('maxlength')) {
-                    Questions can contain up to {{ maximumQuestionLength }} characters.
-                  } @else {
-                    Enter a question.
-                  }
-                </p>
+                <div class="field-feedback">
+                  <p
+                    [id]="'question-error-' + questionIndex"
+                    class="field-error field-error--reserved"
+                    [class.field-error--visible]="showError(question.controls.prompt)"
+                  >
+                    @if (question.controls.prompt.hasError('maxlength')) {
+                      Questions can contain up to {{ maximumQuestionLength }} characters.
+                    } @else {
+                      Enter a question.
+                    }
+                  </p>
+                  <span
+                    class="character-counter"
+                    [class.character-counter--warning]="
+                      question.controls.prompt.value.length >= maximumQuestionLength * 0.9
+                    "
+                    aria-hidden="true"
+                  >
+                    {{ question.controls.prompt.value.length }} / {{ maximumQuestionLength }}
+                  </span>
+                </div>
 
                 <div class="answer-heading">
                   <h3>Answers <span class="required-label">(required)</span></h3>
@@ -255,17 +289,28 @@
                         <img src="assets/images/create-survey/delete.svg" alt="" />
                       </button>
 
-                      <p
-                        [id]="'answer-error-' + questionIndex + '-' + answerIndex"
-                        class="field-error field-error--reserved answer-error"
-                        [class.field-error--visible]="showError(answer)"
-                      >
-                        @if (answer.hasError('maxlength')) {
-                          Answers can contain up to {{ maximumAnswerLength }} characters.
-                        } @else {
-                          Enter an answer.
-                        }
-                      </p>
+                      <div class="field-feedback answer-error">
+                        <p
+                          [id]="'answer-error-' + questionIndex + '-' + answerIndex"
+                          class="field-error field-error--reserved"
+                          [class.field-error--visible]="showError(answer)"
+                        >
+                          @if (answer.hasError('maxlength')) {
+                            Answers can contain up to {{ maximumAnswerLength }} characters.
+                          } @else {
+                            Enter an answer.
+                          }
+                        </p>
+                        <span
+                          class="character-counter"
+                          [class.character-counter--warning]="
+                            answer.value.length >= maximumAnswerLength * 0.9
+                          "
+                          aria-hidden="true"
+                        >
+                          {{ answer.value.length }} / {{ maximumAnswerLength }}
+                        </span>
+                      </div>
                     </div>
                   }
                 </div>
@@ -325,7 +370,10 @@
           type="submit"
           [disabled]="isPublishing() || !!publishedSurveyId()"
         >
-          {{ isPublishing() ? 'Publishing…' : 'Publish' }}
+          <span>{{ isPublishing() ? 'Publishing…' : 'Publish' }}</span>
+          <span class="publish-button__icon" aria-hidden="true">
+            <img src="assets/images/survey-complete-check.svg" alt="" />
+          </span>
         </button>
       </div>
     </form>

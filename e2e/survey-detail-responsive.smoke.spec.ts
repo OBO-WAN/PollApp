@@ -80,6 +80,30 @@ test('keeps survey voting fluid at tablet width', async ({ page }) => {
   expect(pageHasOverflow).toBe(false);
 });
 
+test('transitions the Create survey link into its Figma hover state', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 1000 });
+  await page.goto('/#/surveys/1');
+
+  const createSurveyLink = page.getByRole('link', { name: 'Create survey' });
+  const hoverIcon = page.locator('.create-survey-link__icon');
+
+  await expect(hoverIcon).toHaveCSS('width', '0px');
+  await expect(hoverIcon).toHaveCSS('opacity', '0');
+
+  await createSurveyLink.hover();
+
+  await expect(createSurveyLink).toHaveCSS('background-color', 'rgb(255, 183, 112)');
+  await expect(hoverIcon).toHaveCSS('width', '24px');
+  await expect(hoverIcon).toHaveCSS('margin-left', '10px');
+  await expect(hoverIcon).toHaveCSS('opacity', '1');
+
+  const pageHasOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+
+  expect(pageHasOverflow).toBe(false);
+});
+
 test('uses the same mobile result accordion for a past survey', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/#/surveys/7');
