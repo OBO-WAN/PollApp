@@ -112,10 +112,6 @@
     right: 16px;
   }
 
-  .required-label {
-    display: none;
-  }
-
   .survey-details {
     gap: 24px;
   }
@@ -128,36 +124,6 @@
   .category-field {
     width: 206px;
     order: -1;
-  }
-
-  .category-field > label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .category-field .select-field select {
-    min-height: 32px;
-    padding: 4px 34px 4px 0;
-    color: #fefdff;
-    background-color: transparent;
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  .category-field .select-field select option {
-    color: var(--color-primary-purple);
-    background-color: #fefdff;
-  }
-
-  .category-field .select-field > img {
-    top: 4px;
-    right: 6px;
   }
 
   .question-builder {
