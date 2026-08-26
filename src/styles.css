@@ -13,6 +13,11 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-color: var(--color-primary-orange) var(--color-primary-purple);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary-orange);
 }
 
 html {

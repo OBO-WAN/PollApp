@@ -8,14 +8,16 @@
     gap: 24px;
   }
 
-  .question-builder {
+  .questions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .question-builder {
     gap: 8px;
   }
 
   .secondary-action {
-    justify-self: start;
-    margin-top: 0;
+    align-self: flex-start;
   }
 
   .published-notice {

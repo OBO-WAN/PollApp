@@ -64,11 +64,61 @@ test('keeps the Create Survey form fluid at tablet width', async ({ page }) => {
   await page.goto('/#/surveys/new');
 
   await expect(page.locator('.survey-details')).toHaveCSS('grid-template-columns', '576px');
-  await expect(page.locator('.question-builder')).toHaveCSS('grid-template-columns', '576px');
+  await expect(page.locator('.questions')).toHaveCSS('grid-template-columns', '576px');
 
   const pageHasOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
 
   expect(pageHasOverflow).toBe(false);
+});
+
+for (const viewportWidth of [981, 1200]) {
+  test(`lays questions out in two columns at ${viewportWidth}px`, async ({ page }) => {
+    await page.setViewportSize({ width: viewportWidth, height: 1000 });
+    await page.goto('/#/surveys/new');
+
+    const addQuestion = page.getByRole('button', { name: 'Add next question' });
+    await addQuestion.click();
+    await addQuestion.click();
+
+    const layout = await page.evaluate(() => {
+      const questions = [...document.querySelectorAll<HTMLElement>('.question-card')].map((card) =>
+        card.getBoundingClientRect().toJSON(),
+      );
+      const button = document
+        .querySelector<HTMLElement>('.secondary-action')
+        ?.getBoundingClientRect()
+        .toJSON();
+      const root = document.documentElement;
+
+      return {
+        questions,
+        button,
+        pageHasOverflow: root.scrollWidth > root.clientWidth,
+      };
+    });
+
+    expect(layout.questions).toHaveLength(3);
+    expect(layout.questions[0].top).toBe(layout.questions[1].top);
+    expect(layout.questions[2].top).toBeGreaterThan(layout.questions[0].bottom);
+    expect(layout.button?.top).toBeGreaterThan(layout.questions[2].bottom);
+    expect(layout.pageHasOverflow).toBe(false);
+  });
+}
+
+test('stacks questions and keeps the add button below them at 980px', async ({ page }) => {
+  await page.setViewportSize({ width: 980, height: 1000 });
+  await page.goto('/#/surveys/new');
+
+  const addQuestion = page.getByRole('button', { name: 'Add next question' });
+  await addQuestion.click();
+
+  const firstQuestion = await page.locator('.question-card').nth(0).boundingBox();
+  const secondQuestion = await page.locator('.question-card').nth(1).boundingBox();
+  const button = await addQuestion.boundingBox();
+
+  expect(firstQuestion).not.toBeNull();
+  expect(secondQuestion?.y).toBeGreaterThan((firstQuestion?.y ?? 0) + (firstQuestion?.height ?? 0));
+  expect(button?.y).toBeGreaterThan((secondQuestion?.y ?? 0) + (secondQuestion?.height ?? 0));
 });

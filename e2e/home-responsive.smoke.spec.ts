@@ -68,6 +68,24 @@ test('keeps the Home layout fluid at tablet width', async ({ page }) => {
   expect(pageHasOverflow).toBe(false);
 });
 
+test('keeps the survey collection in a keyboard-scrollable region', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/');
+
+  const surveyList = page.getByRole('region', { name: 'Available surveys' });
+
+  await expect(surveyList).toHaveAttribute('tabindex', '0');
+  await expect(surveyList).toHaveCSS('overflow-y', 'auto');
+  await expect(surveyList).toHaveCSS('max-height', '556px');
+
+  const scrollState = await surveyList.evaluate((element) => ({
+    clientHeight: element.clientHeight,
+    scrollHeight: element.scrollHeight,
+  }));
+
+  expect(scrollState.scrollHeight).toBeGreaterThan(scrollState.clientHeight);
+});
+
 for (const viewportWidth of [1100, 1150, 1200, 1208]) {
   test(`avoids page overflow at the ${viewportWidth}px intermediate width`, async ({ page }) => {
     await page.setViewportSize({ width: viewportWidth, height: 900 });

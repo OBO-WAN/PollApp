@@ -229,6 +229,7 @@
   }
 
   .survey-list {
+    max-height: 633px;
     gap: 15px;
     margin-top: 24px;
     padding-inline: 16px;
