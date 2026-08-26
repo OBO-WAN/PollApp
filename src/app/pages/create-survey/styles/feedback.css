@@ -1,0 +1,20 @@
+.field-feedback {
+  display: grid;
+  min-height: 20px;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: start;
+  gap: 8px;
+}
+
+.character-counter {
+  color: rgb(254 253 255 / 75%);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.character-counter--warning {
+  color: var(--color-primary-orange);
+  font-weight: 700;
+}

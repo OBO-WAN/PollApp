@@ -21,6 +21,7 @@ const SUCCESS_REDIRECT_DELAY_MS = 1500;
   templateUrl: './survey-detail.html',
   styleUrls: [
     './survey-detail.css',
+    './styles/button-motion.css',
     './styles/questions.css',
     './styles/voting.css',
     './styles/results.css',

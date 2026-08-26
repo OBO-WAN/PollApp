@@ -64,6 +64,10 @@ describe('SurveyDetail', () => {
     expect((page.querySelector('.complete-survey-button') as HTMLButtonElement).disabled).toBe(
       true,
     );
+    expect(page.querySelector('.create-survey-link__icon')?.getAttribute('aria-hidden')).toBe(
+      'true',
+    );
+    expect(page.querySelector('.create-survey-link__glyph')).not.toBeNull();
     expect(page.querySelector('form')).not.toBeNull();
   });
 

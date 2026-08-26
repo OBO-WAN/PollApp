@@ -14,7 +14,15 @@
       <span class="app-logo__name"><span>Poll</span><span>App</span></span>
     </a>
 
-    <a class="create-survey-link" routerLink="/surveys/new">Create survey</a>
+    <a class="create-survey-link" routerLink="/surveys/new">
+      <span>Create survey</span>
+      <span class="create-survey-link__icon" aria-hidden="true">
+        <span
+          class="create-survey-link__glyph"
+          style="--create-survey-icon: url('assets/images/create-survey/add-circle.svg')"
+        ></span>
+      </span>
+    </a>
   </header>
 
   <main class="survey-layout">

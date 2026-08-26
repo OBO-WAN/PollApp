@@ -1,0 +1,36 @@
+.publish-button__icon {
+  display: block;
+  width: 0;
+  height: 16px;
+  flex: 0 0 auto;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    width 180ms ease-out,
+    margin-left 180ms ease-out,
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+.publish-button__icon img {
+  display: block;
+  width: 18px;
+  height: 16px;
+}
+
+.publish-button:hover:not(:disabled) .publish-button__icon,
+.publish-button:focus-visible:not(:disabled) .publish-button__icon {
+  width: 18px;
+  margin-left: 10px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .publish-button,
+  .publish-button__icon {
+    transition: none;
+  }
+}
