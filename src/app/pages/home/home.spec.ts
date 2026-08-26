@@ -79,6 +79,14 @@ describe('Home', () => {
     ]);
   });
 
+  it('exposes the survey list as a keyboard-scrollable named region', () => {
+    const surveyList = fixture.nativeElement.querySelector('.survey-list') as HTMLElement;
+
+    expect(surveyList.getAttribute('role')).toBe('region');
+    expect(surveyList.getAttribute('aria-label')).toBe('Available surveys');
+    expect(surveyList.tabIndex).toBe(0);
+  });
+
   it('sorts past surveys by deadline and keeps no-deadline surveys last', async () => {
     await store.createSurvey({
       category: 'Team activities',

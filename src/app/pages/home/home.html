@@ -186,7 +186,13 @@
         </div>
       </div>
 
-      <div class="survey-list" aria-live="polite">
+      <div
+        class="survey-list"
+        role="region"
+        aria-label="Available surveys"
+        aria-live="polite"
+        tabindex="0"
+      >
         @for (survey of visibleSurveys(); track survey.id) {
           <a
             class="survey-list-card"
