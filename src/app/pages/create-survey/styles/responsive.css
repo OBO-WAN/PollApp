@@ -24,6 +24,10 @@
 }
 
 @media (max-width: 650px) {
+  .field-error--reserved {
+    min-height: 40px;
+  }
+
   .create-survey-page {
     padding: 48px 0 57px;
     background-color: rgb(34 18 39 / 72%);
