@@ -1,0 +1,82 @@
+.category-select {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+}
+
+.category-trigger {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 5px 8px 5px 10px;
+  border: 0;
+  border-radius: 5px;
+  align-items: center;
+  gap: 4px;
+  color: #fefdff;
+  background-color: rgb(255 255 255 / 10%);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.category-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.category-trigger::marker {
+  content: '';
+}
+
+.category-trigger img {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.category-options {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 2px);
+  left: 0;
+  display: flex;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 48px));
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0 0 5px 5px;
+  margin: 0;
+  flex-direction: column;
+  background-color: var(--color-primary-purple);
+  box-shadow: 0 8px 16px rgb(15 3 19 / 24%);
+}
+
+.category-option {
+  cursor: pointer;
+}
+
+.category-option span {
+  display: block;
+  padding: 4px 10px;
+  color: var(--color-primary-orange);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.category-option:hover span,
+.category-option input:focus-visible + span {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.category-option input:focus-visible + span {
+  outline: 3px solid var(--color-primary-orange);
+  outline-offset: -3px;
+}
+
+.category-option input:checked + span {
+  font-weight: 700;
+}

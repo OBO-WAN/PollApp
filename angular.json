@@ -22,6 +22,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "pollapp-home-desktop.png",
+                "input": "docs/images",
+                "output": "assets/images"
               }
             ],
             "styles": ["src/styles.css"]

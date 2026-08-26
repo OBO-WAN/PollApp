@@ -33,12 +33,27 @@ for (const viewport of workflowViewports) {
 }
 
 async function verifyCategoryControlStyle(page: Page): Promise<void> {
-  const categorySelect = page.locator('#survey-category');
+  const categoryMenu = page.locator('.category-select');
+  const categoryTrigger = page.locator('#survey-category');
 
-  await expect(categorySelect).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect(categorySelect).toHaveCSS('color', 'rgb(254, 253, 255)');
-  await expect(categorySelect).toHaveCSS('font-size', '18px');
-  await expect(categorySelect).toHaveCSS('font-weight', '700');
+  await expect(categoryTrigger).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.1)');
+  await expect(categoryTrigger).toHaveCSS('color', 'rgb(254, 253, 255)');
+  await expect(categoryTrigger).toHaveCSS('font-size', '18px');
+  await expect(categoryTrigger).toHaveCSS('font-weight', '700');
+  await expect(page.locator('#survey-end-date')).toHaveCSS('cursor', 'pointer');
+
+  await categoryTrigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(categoryMenu).toHaveAttribute('open', '');
+  await expect(
+    page.locator('.category-option').filter({ hasText: 'Team activities' }).locator('span'),
+  ).toBeVisible();
+  await expect(
+    page.locator('.category-option').filter({ hasText: 'Team activities' }).locator('span'),
+  ).toHaveCSS('color', 'rgb(255, 183, 112)');
+  await page.keyboard.press('Escape');
+  await expect(categoryMenu).not.toHaveAttribute('open', '');
+  await expect(page).toHaveURL(/\/#\/surveys\/new$/);
 
   const pageHasOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -64,7 +79,7 @@ async function createSurvey(page: Page, surveyTitle: string): Promise<void> {
   await page
     .locator('#survey-description')
     .fill('A complete browser journey for the frontend survey workflow.');
-  await page.locator('#survey-category').selectOption('Workplace culture');
+  await chooseCategory(page, 'Workplace culture');
 
   const firstQuestion = page.locator('.question-card').first();
 
@@ -88,6 +103,21 @@ async function createSurvey(page: Page, surveyTitle: string): Promise<void> {
   await expect(page.getByRole('status')).toContainText('Your survey is now published');
   await expect(page).toHaveURL(/\/#\/surveys\/new$/);
   await expect(page).toHaveURL(/\/#\/surveys\/[^/]+$/);
+}
+
+async function chooseCategory(page: Page, category: string): Promise<void> {
+  const categoryMenu = page.locator('.category-select');
+  const categoryTrigger = page.locator('#survey-category');
+  const categoryRadio = page.getByRole('radio', { name: category });
+
+  await categoryTrigger.focus();
+  await page.keyboard.press('Enter');
+  await categoryRadio.focus();
+  await page.keyboard.press('Space');
+
+  await expect(categoryRadio).toBeChecked();
+  await expect(categoryMenu).not.toHaveAttribute('open', '');
+  await expect(categoryTrigger).toContainText(category);
 }
 
 async function verifyCreatedSurvey(page: Page, surveyTitle: string): Promise<void> {

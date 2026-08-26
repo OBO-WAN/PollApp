@@ -4,6 +4,37 @@ test.beforeEach(async ({ page }) => {
   await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, (route) => route.abort());
 });
 
+test('publishes canonical SEO and social-sharing metadata', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page).toHaveTitle('PollApp – Angular Survey Application | Francisco Naranjo');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://pollapp.naranjo.io/',
+  );
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'Create responsive polls, collect anonymous votes and view live results with PollApp, an Angular and Supabase survey application by Francisco Naranjo.',
+  );
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    'content',
+    'https://pollapp.naranjo.io/',
+  );
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    'content',
+    'https://pollapp.naranjo.io/assets/images/pollapp-home-desktop.png',
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    'content',
+    'summary_large_image',
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    'content',
+    'https://pollapp.naranjo.io/assets/images/pollapp-home-desktop.png',
+  );
+});
+
 test('matches the 375px Home composition without page overflow', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');

@@ -59,7 +59,8 @@ test('creates a survey in Supabase and persists it across a browser reload', asy
   await page.goto('/#/surveys/new');
   await page.locator('#survey-title').fill(surveyTitle);
   await page.locator('#survey-description').fill('Created by the Supabase integration test.');
-  await page.locator('#survey-category').selectOption('Workplace culture');
+  await page.locator('#survey-category').click();
+  await page.getByRole('radio', { name: 'Workplace culture' }).check();
   await page.locator('#question-0').fill('Which option should persist?');
   await page.locator('#answer-0-0').fill('First');
   await page.locator('#answer-0-1').fill('Second');
