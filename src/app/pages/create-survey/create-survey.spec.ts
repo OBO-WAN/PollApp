@@ -4,6 +4,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideInMemorySurveyRepository } from '../../surveys/in-memory-survey.repository';
 import { SURVEY_REPOSITORY, SurveyRepository } from '../../surveys/survey.repository';
 import { SurveyStore } from '../../surveys/survey-store';
+import {
+  MAX_SURVEY_ANSWER_LENGTH,
+  MAX_SURVEY_DESCRIPTION_LENGTH,
+  MAX_SURVEY_QUESTION_LENGTH,
+  MAX_SURVEY_QUESTIONS,
+  MAX_SURVEY_TITLE_LENGTH,
+} from '../../surveys/survey.model';
 import { CreateSurvey } from './create-survey';
 
 describe('CreateSurvey', () => {
@@ -144,10 +151,102 @@ describe('CreateSurvey', () => {
     expect(fixture.nativeElement.querySelectorAll('.answer-row')).toHaveLength(6);
   });
 
+  it('exposes the database-backed character limits on every text field', () => {
+    expect(field('#survey-title').maxLength).toBe(MAX_SURVEY_TITLE_LENGTH);
+    expect(field('#survey-description').maxLength).toBe(MAX_SURVEY_DESCRIPTION_LENGTH);
+    expect(field('#question-0').maxLength).toBe(MAX_SURVEY_QUESTION_LENGTH);
+    expect(field('#answer-0-0').maxLength).toBe(MAX_SURVEY_ANSWER_LENGTH);
+  });
+
+  it('shows field-specific length errors without calling the repository', async () => {
+    const createSurvey = vi.spyOn(repository, 'createSurvey');
+    fillValidSurvey();
+
+    const cases = [
+      {
+        selector: '#survey-title',
+        validValue: 'Team lunch',
+        invalidValue: 'T'.repeat(MAX_SURVEY_TITLE_LENGTH + 1),
+        errorSelector: '#survey-title-error',
+        expectedMessage: `up to ${MAX_SURVEY_TITLE_LENGTH} characters`,
+      },
+      {
+        selector: '#survey-description',
+        validValue: '',
+        invalidValue: 'D'.repeat(MAX_SURVEY_DESCRIPTION_LENGTH + 1),
+        errorSelector: '#survey-description-error',
+        expectedMessage: `up to ${MAX_SURVEY_DESCRIPTION_LENGTH} characters`,
+      },
+      {
+        selector: '#question-0',
+        validValue: 'Where should we eat?',
+        invalidValue: 'Q'.repeat(MAX_SURVEY_QUESTION_LENGTH + 1),
+        errorSelector: '#question-error-0',
+        expectedMessage: `up to ${MAX_SURVEY_QUESTION_LENGTH} characters`,
+      },
+      {
+        selector: '#answer-0-0',
+        validValue: 'Cafe',
+        invalidValue: 'A'.repeat(MAX_SURVEY_ANSWER_LENGTH + 1),
+        errorSelector: '#answer-error-0-0',
+        expectedMessage: `up to ${MAX_SURVEY_ANSWER_LENGTH} characters`,
+      },
+    ];
+
+    for (const testCase of cases) {
+      setField(testCase.selector, testCase.invalidValue);
+      submitForm();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector(testCase.errorSelector)?.textContent).toContain(
+        testCase.expectedMessage,
+      );
+      expect(createSurvey).not.toHaveBeenCalled();
+
+      setField(testCase.selector, testCase.validValue);
+      fixture.detectChanges();
+    }
+  });
+
+  it('limits a survey to twenty questions', () => {
+    const addQuestion = fixture.nativeElement.querySelector(
+      '.secondary-action',
+    ) as HTMLButtonElement;
+
+    for (let questionCount = 1; questionCount < MAX_SURVEY_QUESTIONS; questionCount += 1) {
+      addQuestion.click();
+      fixture.detectChanges();
+    }
+
+    expect(fixture.nativeElement.querySelectorAll('.question-card')).toHaveLength(
+      MAX_SURVEY_QUESTIONS,
+    );
+    expect(addQuestion.disabled).toBe(true);
+
+    addQuestion.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.question-card')).toHaveLength(
+      MAX_SURVEY_QUESTIONS,
+    );
+  });
+
   function setField(selector: string, value: string, eventType = 'input'): void {
-    const field = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
-    field.value = value;
-    field.dispatchEvent(new Event(eventType, { bubbles: true }));
+    const element = field(selector);
+    element.value = value;
+    element.dispatchEvent(new Event(eventType, { bubbles: true }));
+  }
+
+  function field(selector: string): HTMLInputElement | HTMLTextAreaElement {
+    return fixture.nativeElement.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement;
+  }
+
+  function fillValidSurvey(): void {
+    setField('#survey-title', 'Team lunch');
+    setField('#question-0', 'Where should we eat?');
+    setField('#answer-0-0', 'Cafe');
+    setField('#answer-0-1', 'Park');
+    setField('#survey-category', 'Team activities', 'change');
   }
 
   function submitForm(): void {

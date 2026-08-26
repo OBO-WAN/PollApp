@@ -67,3 +67,16 @@ test('keeps the Home layout fluid at tablet width', async ({ page }) => {
 
   expect(pageHasOverflow).toBe(false);
 });
+
+for (const viewportWidth of [1100, 1150, 1200, 1208]) {
+  test(`avoids page overflow at the ${viewportWidth}px intermediate width`, async ({ page }) => {
+    await page.setViewportSize({ width: viewportWidth, height: 900 });
+    await page.goto('/');
+
+    const pageHasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+
+    expect(pageHasOverflow).toBe(false);
+  });
+}

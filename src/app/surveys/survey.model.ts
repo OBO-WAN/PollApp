@@ -44,6 +44,11 @@ export interface CreateSurveyInput {
 }
 
 export const MAX_SURVEY_ANSWERS = 6;
+export const MAX_SURVEY_ANSWER_LENGTH = 240;
+export const MAX_SURVEY_DESCRIPTION_LENGTH = 2000;
+export const MAX_SURVEY_QUESTIONS = 20;
+export const MAX_SURVEY_QUESTION_LENGTH = 240;
+export const MAX_SURVEY_TITLE_LENGTH = 160;
 
 export const SURVEY_CATEGORIES = [
   'Team activities',

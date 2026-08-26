@@ -44,6 +44,7 @@
                   id="survey-title"
                   type="text"
                   formControlName="title"
+                  [attr.maxlength]="maximumTitleLength"
                   autocomplete="off"
                   [attr.aria-invalid]="showError(surveyForm.controls.title)"
                   aria-describedby="survey-title-error"
@@ -64,7 +65,11 @@
                 class="field-error field-error--reserved"
                 [class.field-error--visible]="showError(surveyForm.controls.title)"
               >
-                Enter a survey name.
+                @if (surveyForm.controls.title.hasError('maxlength')) {
+                  Survey names can contain up to {{ maximumTitleLength }} characters.
+                } @else {
+                  Enter a survey name.
+                }
               </p>
             </div>
 
@@ -140,7 +145,13 @@
             <label for="survey-description">Describing text <span>(optional)</span></label>
 
             <div class="field-with-action field-with-action--top">
-              <textarea id="survey-description" formControlName="description"></textarea>
+              <textarea
+                id="survey-description"
+                formControlName="description"
+                [attr.maxlength]="maximumDescriptionLength"
+                [attr.aria-invalid]="showError(surveyForm.controls.description)"
+                aria-describedby="survey-description-error"
+              ></textarea>
 
               <button
                 class="icon-button"
@@ -151,6 +162,14 @@
                 <img src="assets/images/create-survey/delete.svg" alt="" />
               </button>
             </div>
+
+            <p
+              id="survey-description-error"
+              class="field-error field-error--reserved"
+              [class.field-error--visible]="showError(surveyForm.controls.description)"
+            >
+              Descriptions can contain up to {{ maximumDescriptionLength }} characters.
+            </p>
           </div>
         </section>
 
@@ -179,6 +198,7 @@
                   [id]="'question-' + questionIndex"
                   type="text"
                   formControlName="prompt"
+                  [attr.maxlength]="maximumQuestionLength"
                   placeholder="Which date would work best for you?"
                   [attr.aria-invalid]="showError(question.controls.prompt)"
                   [attr.aria-describedby]="'question-error-' + questionIndex"
@@ -189,7 +209,11 @@
                   class="field-error field-error--reserved"
                   [class.field-error--visible]="showError(question.controls.prompt)"
                 >
-                  Enter a question.
+                  @if (question.controls.prompt.hasError('maxlength')) {
+                    Questions can contain up to {{ maximumQuestionLength }} characters.
+                  } @else {
+                    Enter a question.
+                  }
                 </p>
 
                 <div class="answer-heading">
@@ -215,6 +239,7 @@
                         [id]="'answer-' + questionIndex + '-' + answerIndex"
                         type="text"
                         [formControlName]="answerIndex"
+                        [attr.maxlength]="maximumAnswerLength"
                         [attr.aria-invalid]="showError(answer)"
                         [attr.aria-describedby]="
                           'answer-error-' + questionIndex + '-' + answerIndex
@@ -235,7 +260,11 @@
                         class="field-error field-error--reserved answer-error"
                         [class.field-error--visible]="showError(answer)"
                       >
-                        Enter an answer.
+                        @if (answer.hasError('maxlength')) {
+                          Answers can contain up to {{ maximumAnswerLength }} characters.
+                        } @else {
+                          Enter an answer.
+                        }
                       </p>
                     </div>
                   }
@@ -265,10 +294,19 @@
             }
           </div>
 
-          <button class="secondary-action" type="button" (click)="addQuestion()">
+          <button
+            class="secondary-action"
+            type="button"
+            [disabled]="questions.length >= maximumQuestionCount"
+            aria-describedby="question-limit"
+            (click)="addQuestion()"
+          >
             <span>Add next question</span>
             <img src="assets/images/create-survey/add-circle.svg" alt="" />
           </button>
+          <p id="question-limit" class="visually-hidden">
+            Up to {{ maximumQuestionCount }} questions are allowed per survey.
+          </p>
         </section>
       </div>
 

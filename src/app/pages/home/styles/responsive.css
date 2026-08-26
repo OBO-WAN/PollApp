@@ -1,6 +1,6 @@
 /* Home layout between the 1440px desktop and 375px mobile Figma frames. */
 
-@media (max-width: 1099px) {
+@media (max-width: 1217px) {
   .home-content {
     margin-top: 64px;
   }
@@ -30,7 +30,9 @@
     height: min(38vw, 360px);
     flex: 0 1 360px;
   }
+}
 
+@media (max-width: 1099px) {
   .survey-highlights,
   .survey-browser {
     width: 100%;

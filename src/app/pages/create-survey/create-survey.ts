@@ -13,7 +13,12 @@ import { Router, RouterLink } from '@angular/router';
 
 import {
   CreateSurveyInput,
+  MAX_SURVEY_ANSWER_LENGTH,
   MAX_SURVEY_ANSWERS,
+  MAX_SURVEY_DESCRIPTION_LENGTH,
+  MAX_SURVEY_QUESTION_LENGTH,
+  MAX_SURVEY_QUESTIONS,
+  MAX_SURVEY_TITLE_LENGTH,
   SURVEY_CATEGORIES,
 } from '../../surveys/survey.model';
 import { SurveyStore } from '../../surveys/survey-store';
@@ -55,16 +60,21 @@ export class CreateSurvey implements OnDestroy {
   protected readonly categories = SURVEY_CATEGORIES;
   protected readonly isPublishing = signal(false);
   protected readonly publishedSurveyId = signal<string | null>(null);
+  protected readonly maximumAnswerLength = MAX_SURVEY_ANSWER_LENGTH;
   protected readonly maximumAnswerCount = MAX_SURVEY_ANSWERS;
+  protected readonly maximumDescriptionLength = MAX_SURVEY_DESCRIPTION_LENGTH;
+  protected readonly maximumQuestionCount = MAX_SURVEY_QUESTIONS;
+  protected readonly maximumQuestionLength = MAX_SURVEY_QUESTION_LENGTH;
+  protected readonly maximumTitleLength = MAX_SURVEY_TITLE_LENGTH;
   protected readonly publishError = this.surveyStore.error;
   protected readonly submitted = signal(false);
   protected readonly minimumEndDate = formatLocalDate(new Date());
 
   protected readonly surveyForm = this.formBuilder.group({
-    title: ['', [trimmedRequired]],
+    title: ['', [trimmedRequired, Validators.maxLength(MAX_SURVEY_TITLE_LENGTH)]],
     endDate: ['', [notPastDate]],
     category: ['', [Validators.required]],
-    description: [''],
+    description: ['', [Validators.maxLength(MAX_SURVEY_DESCRIPTION_LENGTH)]],
     questions: this.formBuilder.array<QuestionForm>([this.createQuestion()]),
   });
 
@@ -77,7 +87,9 @@ export class CreateSurvey implements OnDestroy {
   }
 
   protected addQuestion(): void {
-    this.questions.push(this.createQuestion());
+    if (this.questions.length < MAX_SURVEY_QUESTIONS) {
+      this.questions.push(this.createQuestion());
+    }
   }
 
   protected removeQuestion(questionIndex: number): void {
@@ -181,14 +193,17 @@ export class CreateSurvey implements OnDestroy {
 
   private createQuestion(): QuestionForm {
     return this.formBuilder.group({
-      prompt: ['', [trimmedRequired]],
+      prompt: ['', [trimmedRequired, Validators.maxLength(MAX_SURVEY_QUESTION_LENGTH)]],
       allowMultiple: [false],
       answers: this.formBuilder.array<AnswerControl>([this.createAnswer(), this.createAnswer()]),
     });
   }
 
   private createAnswer(): AnswerControl {
-    return this.formBuilder.control('', [trimmedRequired]);
+    return this.formBuilder.control('', [
+      trimmedRequired,
+      Validators.maxLength(MAX_SURVEY_ANSWER_LENGTH),
+    ]);
   }
 
   private createSurveyInput(): CreateSurveyInput {
