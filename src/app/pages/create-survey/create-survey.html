@@ -121,6 +121,7 @@
                 <details
                   #categoryMenu
                   class="category-select"
+                  [class.category-select--chosen]="surveyForm.controls.category.value"
                   (keydown.escape)="closeCategoryMenu($event, categoryMenu)"
                 >
                   <summary
@@ -129,8 +130,12 @@
                     [attr.aria-invalid]="showError(surveyForm.controls.category)"
                     aria-describedby="survey-category-error"
                   >
-                    <span>{{ surveyForm.controls.category.value || 'Choose category' }}</span>
-                    <img src="assets/images/dropdown-arrow.svg" alt="" aria-hidden="true" />
+                    <span>Choose category</span>
+                    <span
+                      class="category-trigger__icon"
+                      style="--category-arrow: url('assets/images/dropdown-arrow.svg')"
+                      aria-hidden="true"
+                    ></span>
                   </summary>
 
                   <fieldset class="category-options">
@@ -152,10 +157,17 @@
 
                 <p
                   id="survey-category-error"
-                  class="field-error field-error--reserved"
-                  [class.field-error--visible]="showError(surveyForm.controls.category)"
+                  class="category-feedback field-error--reserved"
+                  [class.category-feedback--error]="showError(surveyForm.controls.category)"
+                  [class.field-error--visible]="
+                    showError(surveyForm.controls.category) || surveyForm.controls.category.value
+                  "
                 >
-                  Choose a category.
+                  @if (showError(surveyForm.controls.category)) {
+                    Category required
+                  } @else {
+                    {{ surveyForm.controls.category.value }}
+                  }
                 </p>
               </div>
             </div>
