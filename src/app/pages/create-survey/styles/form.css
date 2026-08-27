@@ -108,9 +108,12 @@
   gap: 16px;
 }
 
-#survey-end-date,
-#survey-end-date::-webkit-calendar-picker-indicator {
+#survey-end-date {
   cursor: pointer;
+}
+
+#survey-end-date::-webkit-calendar-picker-indicator {
+  cursor: default;
 }
 
 .icon-button {
