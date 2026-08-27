@@ -79,6 +79,12 @@ describe('CreateSurvey', () => {
     expect(fixture.componentInstance['surveyForm'].controls.category.value).toBe('Team activities');
     expect(categoryMenu.open).toBe(false);
     expect(document.activeElement).toBe(categoryTrigger);
+    expect(categoryTrigger.textContent).toContain('Choose category');
+    expect(categoryTrigger.textContent).not.toContain('Team activities');
+    expect(fixture.nativeElement.querySelector('#survey-category-error')?.textContent).toContain(
+      'Team activities',
+    );
+    expect(categoryMenu.classList.contains('category-select--chosen')).toBe(true);
 
     categoryMenu.open = true;
     categoryTrigger.focus();
@@ -89,6 +95,31 @@ describe('CreateSurvey', () => {
 
     expect(categoryMenu.open).toBe(false);
     expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('reserves the category feedback line for either validation or the selection', async () => {
+    const feedback = fixture.nativeElement.querySelector(
+      '#survey-category-error',
+    ) as HTMLParagraphElement;
+
+    expect(feedback.classList.contains('field-error--visible')).toBe(false);
+    expect(feedback.textContent?.trim()).toBe('');
+
+    submitForm();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(feedback.classList.contains('field-error--visible')).toBe(true);
+    expect(feedback.classList.contains('category-feedback--error')).toBe(true);
+    expect(feedback.textContent).toContain('Category required');
+
+    selectCategory('Team activities');
+    fixture.detectChanges();
+
+    expect(feedback.classList.contains('field-error--visible')).toBe(true);
+    expect(feedback.classList.contains('category-feedback--error')).toBe(false);
+    expect(feedback.textContent).toContain('Team activities');
+    expect(feedback.textContent).not.toContain('Category required');
   });
 
   it('shows publishing feedback before opening the new survey', async () => {

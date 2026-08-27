@@ -35,16 +35,23 @@ for (const viewport of workflowViewports) {
 async function verifyCategoryControlStyle(page: Page): Promise<void> {
   const categoryMenu = page.locator('.category-select');
   const categoryTrigger = page.locator('#survey-category');
+  const categoryIcon = page.locator('.category-trigger__icon');
+  const categoryFeedback = page.locator('#survey-category-error');
 
   await expect(categoryTrigger).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.1)');
   await expect(categoryTrigger).toHaveCSS('color', 'rgb(254, 253, 255)');
   await expect(categoryTrigger).toHaveCSS('font-size', '18px');
   await expect(categoryTrigger).toHaveCSS('font-weight', '700');
+  await expect(categoryTrigger).toContainText('Choose category');
+  await expect(categoryIcon).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await expect(categoryFeedback).toBeHidden();
   await expect(page.locator('#survey-end-date')).toHaveCSS('cursor', 'pointer');
 
   await categoryTrigger.focus();
   await page.keyboard.press('Enter');
   await expect(categoryMenu).toHaveAttribute('open', '');
+  await expect(categoryIcon).toHaveCSS('color', 'rgb(255, 183, 112)');
+  await expect(categoryIcon).toHaveCSS('transform', 'matrix(-1, 0, 0, -1, 0, 0)');
   await expect(
     page.locator('.category-option').filter({ hasText: 'Team activities' }).locator('span'),
   ).toBeVisible();
@@ -53,6 +60,7 @@ async function verifyCategoryControlStyle(page: Page): Promise<void> {
   ).toHaveCSS('color', 'rgb(255, 183, 112)');
   await page.keyboard.press('Escape');
   await expect(categoryMenu).not.toHaveAttribute('open', '');
+  await expect(categoryIcon).toHaveCSS('transform', 'none');
   await expect(page).toHaveURL(/\/#\/surveys\/new$/);
 
   const pageHasOverflow = await page.evaluate(
@@ -68,7 +76,7 @@ async function validateRequiredFields(page: Page): Promise<void> {
   await expect(page.locator('#survey-title')).toBeFocused();
   await expect(page.locator('#survey-title')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByText('Enter a survey name.')).toBeVisible();
-  await expect(page.getByText('Choose a category.')).toBeVisible();
+  await expect(page.getByText('Category required')).toBeVisible();
   await expect(page.getByText('Enter a question.')).toBeVisible();
   await expect(page.getByText('Enter an answer.')).toHaveCount(2);
   await expect(page.locator('.published-notice')).toHaveCount(0);
@@ -117,7 +125,10 @@ async function chooseCategory(page: Page, category: string): Promise<void> {
 
   await expect(categoryRadio).toBeChecked();
   await expect(categoryMenu).not.toHaveAttribute('open', '');
-  await expect(categoryTrigger).toContainText(category);
+  await expect(categoryTrigger).toContainText('Choose category');
+  await expect(categoryTrigger).not.toContainText(category);
+  await expect(page.locator('#survey-category-error')).toHaveText(category);
+  await expect(page.locator('.category-trigger__icon')).toHaveCSS('color', 'rgb(255, 183, 112)');
 }
 
 async function verifyCreatedSurvey(page: Page, surveyTitle: string): Promise<void> {
